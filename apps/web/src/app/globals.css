@@ -1,0 +1,119 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+@layer base {
+  :root {
+    --void: #321847;
+    --ember: #f15153;
+    --gold: #F5A623;
+  }
+
+  * {
+    @apply border-void-800;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(241,81,83,0.3) transparent;
+  }
+
+  *::-webkit-scrollbar { width: 6px; height: 6px; }
+  *::-webkit-scrollbar-track { background: transparent; }
+  *::-webkit-scrollbar-thumb { background: rgba(241,81,83,0.3); border-radius: 3px; }
+
+  html { @apply scroll-smooth; }
+
+  body {
+    @apply bg-void-950 text-white font-sans antialiased;
+    background-image:
+      radial-gradient(ellipse 80% 60% at 50% -10%, rgba(50,24,71,0.6) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 30% at 80% 80%, rgba(241,81,83,0.05) 0%, transparent 60%);
+    background-attachment: fixed;
+  }
+}
+
+@layer components {
+  /* Glass card */
+  .glass {
+    @apply bg-void-800/50 backdrop-blur-md border border-white/10 shadow-quest;
+  }
+
+  .glass-hover {
+    @apply glass transition-all duration-300
+           hover:bg-void-700/60 hover:border-white/20 hover:shadow-glow hover:-translate-y-1;
+  }
+
+  /* Gradient text */
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, #fff 0%, #C9B8D8 50%, #f15153 100%);
+  }
+
+  .text-ember-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(90deg, #f15153 0%, #F5A623 100%);
+  }
+
+  /* XP progress bar track */
+  .xp-track {
+    @apply h-2 rounded-full bg-void-800 overflow-hidden relative;
+  }
+
+  .xp-fill {
+    @apply h-full rounded-full bg-gradient-xp animate-xp-fill;
+    box-shadow: 0 0 8px rgba(245,166,35,0.6);
+  }
+
+  /* Quest tier badges */
+  .tier-F { @apply bg-gray-500/20 text-gray-300 border border-gray-500/30; }
+  .tier-D { @apply bg-blue-500/20 text-blue-300 border border-blue-500/30; }
+  .tier-C { @apply bg-emerald-500/20 text-emerald-300 border border-emerald-500/30; }
+  .tier-B { @apply bg-amber-500/20 text-amber-300 border border-amber-500/30; }
+  .tier-A { @apply bg-orange-500/20 text-orange-300 border border-orange-500/30; }
+  .tier-S {
+    @apply bg-ember-500/20 text-ember-400 border border-ember-500/40;
+    animation: glow 3s ease-in-out infinite alternate;
+  }
+
+  /* Streak flame */
+  .streak-flame {
+    @apply inline-block animate-streak-fire;
+    filter: drop-shadow(0 0 6px #f97316);
+  }
+
+  /* Onboarding step indicator */
+  .step-dot {
+    @apply w-2 h-2 rounded-full bg-void-600 transition-all duration-300;
+  }
+  .step-dot.active {
+    @apply w-6 bg-ember;
+  }
+  .step-dot.done {
+    @apply bg-emerald-500;
+  }
+
+  /* Shimmer skeleton */
+  .skeleton {
+    @apply bg-void-800 rounded-lg overflow-hidden relative;
+  }
+  .skeleton::after {
+    content: '';
+    @apply absolute inset-0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.05) 50%, transparent 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s linear infinite;
+  }
+}
+
+@layer utilities {
+  .text-mist  { color: #C9B8D8; }
+  .text-ash   { color: #6B5080; }
+  .bg-surface { background-color: rgba(74, 32, 96, 0.5); }
+
+  .no-select { user-select: none; }
+
+  /* Focus ring using ember */
+  .focus-ember:focus-visible {
+    @apply outline-none ring-2 ring-ember/60 ring-offset-2 ring-offset-void-950;
+  }
+}

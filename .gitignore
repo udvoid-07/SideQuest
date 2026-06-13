@@ -1,0 +1,17 @@
+node_modules
+.next
+dist
+.env
+.env.local
+.env.*.local
+.turbo
+*.log
+.DS_Store
+Thumbs.db
+.expo
+
+# Scripts env — contains service role key, NEVER commit
+scripts/.env
+
+# Claude Code memory and session logs — never commit
+.claude/

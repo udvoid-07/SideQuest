@@ -1,0 +1,40 @@
+{
+  "expo": {
+    "name": "SideQuest",
+    "slug": "sidequest",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "sidequest",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#321847"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.sidequest.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#321847"
+      },
+      "package": "com.sidequest.app"
+    },
+    "plugins": [
+      "expo-router",
+      ["expo-notifications", {
+        "icon": "./assets/notification-icon.png",
+        "color": "#f15153"
+      }],
+      ["expo-location", {
+        "locationAlwaysAndWhenInUsePermission": "SideQuest uses your location to suggest nearby quests."
+      }]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
