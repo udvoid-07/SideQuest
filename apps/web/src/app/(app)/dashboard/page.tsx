@@ -37,12 +37,12 @@ export default async function DashboardPage() {
   const statsMap: CategoryStats = {}
   for (const { category, count } of catStats) statsMap[category] = count
 
-  // Smart suggestions — exclude today's + queued + completed
-  const queuedQuestIds = queuedQuests.map((uq: any) => uq.quest_id as string)
+  // Smart suggestions — pass already-fetched prefs to avoid a duplicate DB call
   const suggested = await getSuggestedQuests(
     supabase, profile,
     (todayUserQuest as any)?.quest_id ?? undefined,
     4,
+    prefs,
   )
 
   const levelInfo = getLevelInfo(profile.xp)

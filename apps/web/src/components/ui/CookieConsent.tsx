@@ -27,9 +27,9 @@ export function CookieConsent() {
     <div
       className="fixed bottom-20 md:bottom-4 left-4 right-4 md:left-auto md:right-6 md:max-w-sm z-40 rounded-2xl p-4 shadow-quest"
       style={{
-        background: 'rgba(50,24,71,0.97)',
+        background: 'rgba(16,11,6,0.97)',
         backdropFilter: 'blur(16px)',
-        border: '1px solid rgba(255,255,255,0.12)',
+        border: '1px solid rgba(255,210,170,0.12)',
       }}
     >
       <div className="flex items-start gap-3">
@@ -44,19 +44,19 @@ export function CookieConsent() {
           <div className="flex gap-2">
             <button
               onClick={accept}
-              className="flex-1 h-8 rounded-lg bg-ember text-white text-xs font-semibold hover:bg-ember-600 transition-colors"
+              className="flex-1 h-11 rounded-xl bg-ember text-white text-sm font-semibold hover:bg-ember-600 transition-colors active:scale-95"
             >
               Accept
             </button>
             <button
               onClick={decline}
-              className="flex-1 h-8 rounded-lg bg-void-700 border border-white/10 text-xs text-mist font-semibold hover:bg-void-600 transition-colors"
+              className="flex-1 h-11 rounded-xl bg-void-700 border border-white/10 text-sm text-mist font-semibold hover:bg-void-600 transition-colors active:scale-95"
             >
               Decline
             </button>
           </div>
         </div>
-        <button onClick={decline} className="text-ash hover:text-white transition-colors flex-shrink-0">
+        <button onClick={decline} className="w-11 h-11 flex items-center justify-center text-ash hover:text-white transition-colors flex-shrink-0 -mr-2 -mt-1">
           <X size={16} />
         </button>
       </div>

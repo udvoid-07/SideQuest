@@ -30,6 +30,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             'border border-white/10 text-white placeholder:text-ash',
             'transition-all duration-200 outline-none',
             'focus:border-ember/60 focus:bg-void-700/80 focus:ring-2 focus:ring-ember/20',
+            'text-base',  // 16px — prevents iOS Safari from auto-zooming on focus
             error && 'border-red-500/60 focus:border-red-500/80 focus:ring-red-500/20',
             icon && 'pl-10',
             className,

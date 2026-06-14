@@ -69,6 +69,7 @@ export function QuestBrowserCard({
         animate={{ opacity, y: 0 }}
         exit={{ opacity: 0, scale: 0.95 }}
         whileHover={!done ? { y: -3 } : undefined}
+        whileTap={{ scale: 0.985 }}
         className="relative rounded-2xl overflow-hidden border border-white/10"
         style={{
           background: 'linear-gradient(135deg, rgba(74,32,96,0.65) 0%, rgba(50,24,71,0.95) 100%)',
@@ -101,7 +102,7 @@ export function QuestBrowserCard({
             </div>
             <button
               onClick={() => setShowInfo(true)}
-              className="w-7 h-7 rounded-full bg-white/10 hover:bg-ember/20 hover:text-ember text-ash transition-colors flex items-center justify-center flex-shrink-0"
+              className="w-11 h-11 rounded-full bg-white/10 hover:bg-ember/20 hover:text-ember text-ash transition-colors flex items-center justify-center flex-shrink-0 -mr-2 -mt-1"
               aria-label="Quest info"
             >
               <Info size={13} />

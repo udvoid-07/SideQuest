@@ -50,7 +50,7 @@ export default function PrivacyPolicy() {
           },
           {
             title: '10. Contact',
-            body: `For privacy concerns, data requests, or account deletion: Email — privacy@sidequest.app`,
+            body: `For privacy concerns, data requests, or account deletion: Email — tools@stratschool.org`,
           },
         ].map(s => (
           <section key={s.title} className="mb-8">

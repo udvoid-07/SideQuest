@@ -17,9 +17,10 @@ export function MobileNav() {
     <nav
       className="fixed bottom-0 left-0 right-0 z-30 flex md:hidden"
       style={{
-        background: 'rgba(15,7,22,0.97)',
+        background: 'rgba(10,7,5,0.97)',
         backdropFilter: 'blur(20px)',
-        borderTop: '1px solid rgba(255,255,255,0.07)',
+        borderTop: '1px solid rgba(255,210,170,0.08)',
+        paddingBottom: 'env(safe-area-inset-bottom)',
       }}
     >
       {nav.map(({ href, icon: Icon, label }) => {

@@ -1,7 +1,9 @@
 import Link from 'next/link'
-import { Compass, Zap, Map, User, ArrowRight, Star, Flame, Shield } from 'lucide-react'
+import { Compass, Zap, Map, User, ArrowRight, Flame, Shield } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Navbar } from '@/components/layout/Navbar'
+import { StarField } from '@/components/StarField'
+import { createSupabaseServerClient } from '@/lib/supabase-server'
 
 const FEATURED_QUESTS = [
   {
@@ -54,24 +56,40 @@ const TIER_COLORS: Record<string, string> = {
   F: '#9CA3AF', D: '#60A5FA', C: '#34D399', B: '#FBBF24', A: '#F97316', S: '#f15153',
 }
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  let questsDone: number | null = null
+  let questTypes: number | null = null
+  try {
+    const supabase = createSupabaseServerClient()
+    const [r1, r2] = await Promise.all([
+      supabase.from('user_quests').select('*', { count: 'exact', head: true }).eq('status', 'completed'),
+      supabase.from('quests').select('*', { count: 'exact', head: true }).eq('is_active', true),
+    ])
+    questsDone = r1.count
+    questTypes = r2.count
+  } catch { /* fallback to dashes if DB is unreachable */ }
+
+  const stats = [
+    { value: questsDone != null ? (questsDone > 999 ? `${(questsDone / 1000).toFixed(1)}K+` : `${questsDone}+`) : '—', label: 'Quests Done' },
+    { value: questTypes != null ? `${questTypes}+` : '—', label: 'Quest Types' },
+    { value: '8', label: 'Categories' },
+  ]
+
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen relative">
+      <StarField />
       <Navbar />
 
       {/* ── Hero ──────────────────────────────────────────── */}
       <section className="relative min-h-screen flex items-center pt-16 overflow-hidden">
-        {/* Background blobs */}
+        {/* Background blobs — warm palette */}
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full blur-[120px] opacity-20"
-               style={{ background: '#f15153' }} />
-          <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full blur-[100px] opacity-15"
-               style={{ background: '#F5A623' }} />
-          <div className="absolute top-1/3 right-1/3 w-64 h-64 rounded-full blur-[80px] opacity-10"
-               style={{ background: '#8b5cf6' }} />
-          {/* Grid pattern */}
-          <div className="absolute inset-0 opacity-[0.03]"
-               style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)', backgroundSize: '64px 64px' }} />
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full blur-[130px] opacity-18"
+               style={{ background: '#E8663D' }} />
+          <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full blur-[110px] opacity-12"
+               style={{ background: '#F4A261' }} />
+          <div className="absolute top-1/3 right-1/3 w-64 h-64 rounded-full blur-[90px] opacity-8"
+               style={{ background: '#C2855A' }} />
         </div>
 
         <div className="max-w-7xl mx-auto px-6 py-20 grid lg:grid-cols-2 gap-12 items-center relative">
@@ -114,11 +132,7 @@ export default function LandingPage() {
 
             {/* Social proof */}
             <div className="flex items-center gap-6 pt-2">
-              {[
-                { value: '10K+', label: 'Quests Done' },
-                { value: '500+', label: 'Quest Types' },
-                { value: '8', label: 'Categories' },
-              ].map(s => (
+              {stats.map(s => (
                 <div key={s.label}>
                   <div className="text-2xl font-black text-white">{s.value}</div>
                   <div className="text-xs text-ash">{s.label}</div>

@@ -1,11 +1,12 @@
 'use client'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { LayoutDashboard, Map, User, Compass, LogOut, Flame } from 'lucide-react'
+import { LayoutDashboard, Map, User, LogOut, Flame } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { LevelBadge } from '@/components/gamification/LevelBadge'
 import { XPBar } from '@/components/gamification/XPBar'
 import { signOut } from '@/app/actions'
+import { SideQuestIcon } from '@/components/ui/SideQuestIcon'
 import type { UserProfile } from '@sidequest/core'
 
 const nav = [
@@ -27,17 +28,15 @@ export function Sidebar({ user }: { user: UserProfile }) {
     <aside
       className="fixed left-0 top-0 bottom-0 w-60 flex flex-col z-20"
       style={{
-        background: 'rgba(15,7,22,0.95)',
+        background: 'rgba(10,7,5,0.96)',
         backdropFilter: 'blur(20px)',
-        borderRight: '1px solid rgba(255,255,255,0.07)',
+        borderRight: '1px solid rgba(255,210,170,0.07)',
       }}
     >
       {/* Logo */}
       <div className="h-16 flex items-center px-5 border-b border-white/5">
         <Link href="/" className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-ember flex items-center justify-center shadow-ember">
-            <Compass size={15} className="text-white" />
-          </div>
+          <SideQuestIcon size={28} />
           <span className="font-bold text-base tracking-tight">
             Side<span className="text-ember">Quest</span>
           </span>
@@ -45,7 +44,7 @@ export function Sidebar({ user }: { user: UserProfile }) {
       </div>
 
       {/* User card */}
-      <div className="mx-3 mt-4 p-3 rounded-xl" style={{ background: 'rgba(74,32,96,0.4)', border: '1px solid rgba(255,255,255,0.08)' }}>
+      <div className="mx-3 mt-4 p-3 rounded-xl" style={{ background: 'rgba(42,26,14,0.6)', border: '1px solid rgba(255,210,170,0.10)' }}>
         <div className="flex items-center gap-3">
           <LevelBadge xp={user.xp} size="sm" />
           <div className="flex-1 min-w-0">

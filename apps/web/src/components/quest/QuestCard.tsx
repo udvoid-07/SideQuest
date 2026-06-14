@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { LevelUpModal } from '@/components/ui/LevelUpModal'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Clock, Coins, Zap, Info, Play, CheckCircle2, SkipForward, Lock } from 'lucide-react'
+import { Clock, Coins, Zap, Info, Play, CheckCircle2, SkipForward, Lock, XCircle } from 'lucide-react'
 import type { Quest, UserQuest } from '@sidequest/core'
 import {
   TIER_COLORS, TIER_LABELS, CATEGORY_ICONS, CATEGORY_COLORS,
@@ -12,7 +12,7 @@ import {
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { QuestInfoPanel } from './QuestInfoPanel'
-import { startQuest, completeQuest, skipQuest } from '@/app/actions'
+import { startQuest, completeQuest, skipQuest, abandonQuest } from '@/app/actions'
 import { cn } from '@/lib/utils'
 
 interface QuestCardProps {
@@ -27,6 +27,7 @@ export function QuestCard({ quest, userQuest, featured = false, compact = false,
   const router = useRouter()
   const [showInfo,    setShowInfo]    = useState(false)
   const [loading,     setLoading]     = useState<string | null>(null)
+  const [started,     setStarted]     = useState(false)
   const [levelUpData, setLevelUpData] = useState<{ level: number; xp: number; badges: any[] } | null>(null)
 
   const tierColor       = TIER_COLORS[quest.tier]
@@ -37,11 +38,18 @@ export function QuestCard({ quest, userQuest, featured = false, compact = false,
   const status       = userQuest?.status ?? 'available'
   const isCompleted  = status === 'completed'
   const isInProgress = status === 'in_progress'
-  const isLocked     = isInProgress &&
-    !!userQuest?.lock_expires_at &&
-    new Date(userQuest.lock_expires_at).getTime() > now
+  const lockExpiry   = userQuest?.lock_expires_at
+    ? new Date(userQuest.lock_expires_at).getTime()
+    : null
+  const isLocked     = isInProgress && !!lockExpiry && lockExpiry > now
+  const lockSecsLeft = isLocked && lockExpiry ? Math.ceil((lockExpiry - now) / 1000) : 0
+  const lockMins     = Math.floor(lockSecsLeft / 60)
+  const lockSecs     = lockSecsLeft % 60
+  const lockLabel    = lockSecsLeft > 0
+    ? `${lockMins}:${String(lockSecs).padStart(2, '0')} left`
+    : ''
 
-  // Tick every second while locked so the card re-evaluates on expiry
+  // Tick every second while locked
   useEffect(() => {
     if (!isLocked) return
     const id = setInterval(() => setNow(Date.now()), 1000)
@@ -55,6 +63,11 @@ export function QuestCard({ quest, userQuest, featured = false, compact = false,
       if (res?.error) {
         console.error(res.error)
       } else {
+        if (action === 'start') {
+          setStarted(true)
+          setTimeout(() => { setStarted(false); router.refresh() }, 1800)
+          return
+        }
         // Check for level-up from complete_quest result
         if (action === 'complete' && res?.result?.leveled_up) {
           setLevelUpData({
@@ -78,17 +91,20 @@ export function QuestCard({ quest, userQuest, featured = false, compact = false,
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        whileHover={!compact ? { y: -4 } : undefined}
+        whileHover={!compact ? { y: -4, boxShadow: '0 20px 60px rgba(0,0,0,0.5), 0 0 30px rgba(241,81,83,0.08), inset 0 1px 0 rgba(255,255,255,0.12)' } : undefined}
+        whileTap={!isCompleted ? { scale: 0.985 } : undefined}
         className={cn(
-          'relative rounded-2xl overflow-hidden transition-shadow duration-300',
-          'border border-white/10',
-          featured ? 'shadow-glow' : 'shadow-quest',
+          'relative rounded-2xl overflow-hidden transition-all duration-300',
+          featured ? 'shadow-glow' : '',
           isCompleted && 'opacity-70',
           compact ? 'p-4' : 'p-5',
         )}
         style={{
-          background: 'linear-gradient(135deg, rgba(74,32,96,0.7) 0%, rgba(50,24,71,0.95) 100%)',
-          backdropFilter: 'blur(12px)',
+          background: 'rgba(50, 24, 71, 0.3)',
+          backdropFilter: 'blur(28px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(28px) saturate(180%)',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.08)',
         }}
       >
         {/* Tier accent line */}
@@ -111,7 +127,7 @@ export function QuestCard({ quest, userQuest, featured = false, compact = false,
           </div>
           <button
             onClick={() => setShowInfo(true)}
-            className="flex-shrink-0 w-7 h-7 rounded-full bg-white/10 hover:bg-ember/20 hover:text-ember text-ash transition-colors flex items-center justify-center"
+            className="flex-shrink-0 w-11 h-11 rounded-full bg-white/10 hover:bg-ember/20 hover:text-ember text-ash transition-colors flex items-center justify-center -mr-2 -mt-1"
             aria-label="Show quest info"
           >
             <Info size={14} />
@@ -162,19 +178,53 @@ export function QuestCard({ quest, userQuest, featured = false, compact = false,
               </div>
             ) : isInProgress ? (
               isLocked ? (
-                <div className="flex items-center gap-2 text-ash text-sm w-full justify-center py-1.5">
-                  <Lock size={13} />
-                  <span>Locked until quest time is up</span>
+                <div className="flex flex-col gap-2 w-full">
+                  <div className="flex items-center justify-between text-xs text-ash px-1">
+                    <span className="flex items-center gap-1.5">
+                      <Lock size={11} />
+                      Quest in progress
+                    </span>
+                    <span className="font-mono text-amber-400 font-semibold">{lockLabel}</span>
+                  </div>
+                  <Button
+                    size="sm" fullWidth variant="ghost"
+                    loading={loading === 'complete'}
+                    onClick={() => handle('complete', () => completeQuest(userQuest!.id))}
+                    className="border border-white/10 text-ash hover:text-white hover:border-white/25"
+                  >
+                    <CheckCircle2 size={14} /> Finish Early
+                  </Button>
                 </div>
               ) : (
-                <Button
-                  size="sm" fullWidth
-                  loading={loading === 'complete'}
-                  onClick={() => handle('complete', () => completeQuest(userQuest!.id))}
-                >
-                  <CheckCircle2 size={15} /> Mark Complete
-                </Button>
+                <div className="flex gap-2 w-full">
+                  <Button
+                    size="sm"
+                    loading={loading === 'complete'}
+                    onClick={() => handle('complete', () => completeQuest(userQuest!.id))}
+                    className="flex-1"
+                  >
+                    <CheckCircle2 size={15} /> Mark Complete
+                  </Button>
+                  <Button
+                    size="sm" variant="ghost"
+                    loading={loading === 'abandon'}
+                    onClick={() => handle('abandon', () => abandonQuest(userQuest!.id))}
+                    className="w-9 px-0 flex-shrink-0 border border-white/10 text-ash hover:text-red-400 hover:border-red-500/30"
+                    title="Abandon quest"
+                  >
+                    <XCircle size={14} />
+                  </Button>
+                </div>
               )
+            ) : started ? (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.92 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="flex items-center gap-2 text-amber-400 text-sm font-semibold w-full justify-center py-1"
+              >
+                <Play size={15} className="fill-amber-400" />
+                Quest started! Go make it happen.
+              </motion.div>
             ) : (
               <>
                 <Button

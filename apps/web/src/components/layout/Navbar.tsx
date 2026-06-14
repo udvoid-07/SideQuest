@@ -1,8 +1,8 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Compass } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
+import { SideQuestIcon } from '@/components/ui/SideQuestIcon'
 
 export function Navbar() {
   const pathname = usePathname()
@@ -12,15 +12,13 @@ export function Navbar() {
     <nav
       className="fixed top-0 left-0 right-0 z-30 h-16 flex items-center px-6"
       style={{
-        background: 'rgba(15,7,22,0.85)',
+        background: 'rgba(10,7,5,0.92)',
         backdropFilter: 'blur(20px)',
-        borderBottom: '1px solid rgba(255,255,255,0.07)',
+        borderBottom: '1px solid rgba(255,210,170,0.07)',
       }}
     >
       <Link href="/" className="flex items-center gap-2.5 mr-auto">
-        <div className="w-8 h-8 rounded-xl bg-ember flex items-center justify-center shadow-ember">
-          <Compass size={18} className="text-white" />
-        </div>
+        <SideQuestIcon size={32} />
         <span className="font-bold text-lg tracking-tight">
           Side<span className="text-ember">Quest</span>
         </span>

@@ -50,7 +50,7 @@ export default function TermsOfService() {
           },
           {
             title: '10. Contact',
-            body: `For questions about these Terms: legal@sidequest.app`,
+            body: `For questions about these Terms: tools@stratschool.org`,
           },
         ].map(s => (
           <section key={s.title} className="mb-8">

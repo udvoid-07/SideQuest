@@ -60,13 +60,13 @@ export function QuestInfoPanel({ quest, onClose, userCity = '' }: QuestInfoPanel
         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
         className="fixed right-0 top-0 bottom-0 w-full max-w-md z-50 overflow-y-auto"
         style={{
-          background: 'linear-gradient(160deg, #1e0e2b 0%, #321847 100%)',
-          borderLeft: '1px solid rgba(255,255,255,0.1)',
+          background: 'linear-gradient(160deg, #100b06 0%, #1c1109 60%, #2a1a0e 100%)',
+          borderLeft: '1px solid rgba(255,210,170,0.10)',
         }}
       >
         {/* Header */}
         <div className="sticky top-0 z-10 px-6 py-4 flex items-center justify-between"
-          style={{ background: 'rgba(30,14,43,0.95)', backdropFilter: 'blur(8px)', borderBottom: '1px solid rgba(255,255,255,0.08)' }}
+          style={{ background: 'rgba(16,11,6,0.97)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(255,210,170,0.07)' }}
         >
           <div className="flex items-center gap-2">
             <span className="text-2xl">{CATEGORY_ICONS[quest.category]}</span>
@@ -76,7 +76,7 @@ export function QuestInfoPanel({ quest, onClose, userCity = '' }: QuestInfoPanel
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-mist hover:text-white transition-colors"
+            className="w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-mist hover:text-white transition-colors"
           >
             <X size={16} />
           </button>

@@ -165,6 +165,60 @@ export async function resumeQuest(userQuestId: string) {
   return { success: true }
 }
 
+// ─── Abandon an in-progress / assigned quest ─────────────
+export async function abandonQuest(userQuestId: string) {
+  const user = await getAuthUser()
+  if (!user) return { error: 'Not authenticated' }
+
+  const supabase = createSupabaseServerClient()
+  await supabase
+    .from('user_quests')
+    .update({ status: 'skipped' })
+    .eq('id', userQuestId)
+    .eq('user_id', user.id)
+    .in('status', ['in_progress', 'paused', 'assigned'])
+
+  revalidatePath('/dashboard')
+  revalidatePath('/profile')
+  return { success: true }
+}
+
+// ─── Update user profile ──────────────────────────────────
+export async function updateProfile(updates: {
+  username?: string
+  city?: string
+  personality_type?: string
+  fitness_level?: number
+  budget_tier?: number
+}) {
+  const user = await getAuthUser()
+  if (!user) return { error: 'Not authenticated' }
+
+  const supabase = createSupabaseServerClient()
+  const { error } = await supabase
+    .from('users')
+    .update(updates)
+    .eq('id', user.id)
+
+  if (error) return { error: error.message }
+  revalidatePath('/profile')
+  revalidatePath('/dashboard')
+  return { success: true }
+}
+
+// ─── Send password reset email ────────────────────────────
+export async function sendPasswordReset() {
+  const user = await getAuthUser()
+  if (!user?.email) return { error: 'Not authenticated' }
+
+  const supabase = createSupabaseServerClient()
+  const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
+    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'}/reset-password`,
+  })
+  if (error) return { error: error.message }
+  return { success: true }
+}
+
 // ─── Remove a queued quest ────────────────────────────────
 export async function removeFromQueue(userQuestId: string) {
   const user = await getAuthUser()

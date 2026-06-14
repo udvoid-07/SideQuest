@@ -119,7 +119,7 @@ export default function OnboardingPage() {
   function goPrev() { setDir(-1); setStep(s => s - 1) }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 relative overflow-hidden">
+    <div className="min-h-dvh flex flex-col items-center justify-center px-4 relative overflow-hidden">
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-1/3 left-1/3 w-96 h-96 rounded-full blur-[120px] opacity-10" style={{ background: '#f15153' }} />
       </div>

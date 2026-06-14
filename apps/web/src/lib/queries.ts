@@ -98,26 +98,26 @@ export async function getSuggestedQuests(
   user: UserProfile,
   excludeQuestId?: string,
   limit = 6,
+  cachedPrefs?: { declinedIds: string[]; declinedTags: string[]; interestedIds: string[] },
 ): Promise<Quest[]> {
-  // Fetch all candidate quests for this user's profile
-  const { data: all } = await supabase
-    .from('quests')
-    .select('*')
-    .eq('is_active', true)
-    .lte('min_age', user.age)
-    .gte('max_age', user.age)
-    .lte('budget_tier', user.budget_tier)
-    .lte('fitness_required', user.fitness_level)
-    .in('personality_match', ['all', user.personality_type])
-
-  if (!all || all.length === 0) return []
-
-  // Gather user history for scoring
-  const [completedRes, prefsRes, queuedRes] = await Promise.all([
+  // Fetch candidate quests + user history in parallel
+  const [allRes, completedRes, queuedRes, prefsRes] = await Promise.all([
+    supabase
+      .from('quests')
+      .select('*')
+      .eq('is_active', true)
+      .lte('min_age', user.age)
+      .gte('max_age', user.age)
+      .lte('budget_tier', user.budget_tier)
+      .lte('fitness_required', user.fitness_level)
+      .in('personality_match', ['all', user.personality_type]),
     supabase.from('user_quests').select('quest_id').eq('user_id', user.id).eq('status', 'completed'),
-    getUserPreferences(supabase, user.id),
     supabase.from('user_quests').select('quest_id').eq('user_id', user.id).in('status', ['queued','assigned','in_progress','paused']),
+    cachedPrefs ? Promise.resolve(cachedPrefs) : getUserPreferences(supabase, user.id),
   ])
+
+  const all = allRes.data
+  if (!all || all.length === 0) return []
 
   const completedIds = (completedRes.data ?? []).map((r: any) => r.quest_id)
   const queuedIds    = (queuedRes.data ?? []).map((r: any) => r.quest_id)
