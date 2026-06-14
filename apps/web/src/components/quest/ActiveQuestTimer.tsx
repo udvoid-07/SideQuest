@@ -22,12 +22,13 @@ function getRemaining(expiresAt: string): number {
 
 function formatTime(ms: number): string {
   const s = Math.floor(ms / 1000)
-  const h = Math.floor(s / 3600)
-  const m = Math.floor((s % 3600) / 60)
-  const sec = s % 60
-  return h > 0
-    ? `${h}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`
-    : `${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`
+  const days = Math.floor(s / 86400)
+  const h    = Math.floor((s % 86400) / 3600)
+  const m    = Math.floor((s % 3600) / 60)
+  const sec  = s % 60
+  if (days > 0) return `${days}d ${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
+  if (h > 0)   return `${h}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`
+  return `${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`
 }
 
 export function ActiveQuestTimer({
