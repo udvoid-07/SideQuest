@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Target, TrendingUp, Trophy, Sparkles, ListChecks, ArrowRight, Brain, Calendar } from 'lucide-react'
+import { Greeting } from '@/components/ui/Greeting'
 import { WeekPlanButton } from '@/components/quest/WeekPlanButton'
 import { QuestCard } from '@/components/quest/QuestCard'
 import { ActiveQuestTimer } from '@/components/quest/ActiveQuestTimer'
@@ -46,8 +47,6 @@ export default async function DashboardPage() {
   )
 
   const levelInfo = getLevelInfo(profile.xp)
-  const hour      = new Date().getHours()
-  const greeting  = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
 
   // Find any active/paused quest (today's or from queue)
   const allUserQuests = [
@@ -63,14 +62,7 @@ export default async function DashboardPage() {
     <div className="p-8 max-w-4xl">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-black text-white">
-          {greeting}, <span className="text-ember">{profile.username}</span> 👋
-        </h1>
-        <p className="text-mist mt-1">
-          {profile.streak_count > 0
-            ? `${profile.streak_count}-day streak going. Keep the momentum.`
-            : 'Your next story starts today.'}
-        </p>
+        <Greeting username={profile.username} streak={profile.streak_count} />
       </div>
 
       {/* Stats */}
