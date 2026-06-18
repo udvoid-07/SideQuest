@@ -1,10 +1,13 @@
 'use client'
 import { useState } from 'react'
-import { Check, Loader2, User, Mail, Lock, MapPin, ChevronDown, ChevronUp } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Check, Loader2, User, Mail, Lock, MapPin, ChevronDown, ChevronUp, Map } from 'lucide-react'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
 import { updateProfile, sendPasswordReset } from '@/app/actions'
 import type { UserProfile, PersonalityType, FitnessLevel, BudgetTier } from '@sidequest/core'
+
+const TOUR_KEY = 'sq:tour:seen'
 
 const PERSONALITIES = [
   { value: 'introvert',  label: 'Introvert',  icon: '🌙', desc: 'Solo, calm, deep' },
@@ -32,6 +35,8 @@ interface Props {
 }
 
 export function AccountSettingsForm({ profile }: Props) {
+  const router = useRouter()
+
   // Account fields
   const [username, setUsername]     = useState(profile.username ?? '')
   const [city, setCity]             = useState(profile.city ?? '')
@@ -219,6 +224,24 @@ export function AccountSettingsForm({ profile }: Props) {
             </div>
           </div>
         )}
+      </div>
+
+      {/* ── Guided Tour ── */}
+      <div className="p-5">
+        <p className="text-xs font-semibold text-ash uppercase tracking-widest mb-3">Help</p>
+        <button
+          onClick={() => {
+            localStorage.removeItem(TOUR_KEY)
+            router.push('/dashboard?tour=1')
+          }}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold border border-white/10 text-mist hover:text-white hover:border-ember/40 hover:bg-ember/8 transition-all w-full"
+        >
+          <Map size={14} className="text-ember" />
+          Take the Guided Tour
+        </button>
+        <p className="text-[11px] text-ash mt-1.5 pl-1">
+          Replay the feature walkthrough shown at first sign-in.
+        </p>
       </div>
 
       {/* ── Save ── */}

@@ -10,9 +10,9 @@ import { SideQuestIcon } from '@/components/ui/SideQuestIcon'
 import type { UserProfile } from '@sidequest/core'
 
 const nav = [
-  { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { href: '/quests',    icon: Map,             label: 'All Quests'  },
-  { href: '/profile',   icon: User,            label: 'Profile'     },
+  { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard',  tourId: undefined         },
+  { href: '/quests',    icon: Map,             label: 'All Quests', tourId: 'sidebar-quests'  },
+  { href: '/profile',   icon: User,            label: 'Profile',    tourId: 'sidebar-profile' },
 ]
 
 export function Sidebar({ user }: { user: UserProfile }) {
@@ -60,10 +60,11 @@ export function Sidebar({ user }: { user: UserProfile }) {
 
       {/* Nav */}
       <nav className="flex-1 px-3 mt-4 space-y-1">
-        {nav.map(({ href, icon: Icon, label }) => {
+        {nav.map(({ href, icon: Icon, label, tourId }) => {
           const active = pathname === href || pathname.startsWith(href + '/')
           return (
             <Link key={href} href={href}
+              {...(tourId ? { 'data-tour': tourId } : {})}
               className={cn(
                 'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200',
                 active

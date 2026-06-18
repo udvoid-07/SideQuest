@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { Target, TrendingUp, Trophy, Sparkles, ListChecks, ArrowRight, Brain, Calendar } from 'lucide-react'
+import { Target, TrendingUp, Trophy, Sparkles, ListChecks, ArrowRight } from 'lucide-react'
 import { Greeting } from '@/components/ui/Greeting'
 import { WeekPlanButton } from '@/components/quest/WeekPlanButton'
 import { QuestCard } from '@/components/quest/QuestCard'
@@ -17,6 +17,7 @@ import {
 import { getLevelInfo } from '@sidequest/core'
 import { formatRelativeTime } from '@/lib/utils'
 import type { CategoryStats } from '@/lib/quest-scoring'
+import { TourLauncher } from '@/components/tour/TourLauncher'
 
 export default async function DashboardPage() {
   const user = await getAuthUser()
@@ -60,13 +61,16 @@ export default async function DashboardPage() {
 
   return (
     <div className="p-8 max-w-4xl">
+      {/* Guided tour — auto-shows for new users, skippable */}
+      <TourLauncher />
+
       {/* Header */}
       <div className="mb-8">
         <Greeting username={profile.username} streak={profile.streak_count} />
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div data-tour="stats" className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <div className="glass rounded-2xl p-4 flex items-center gap-3">
           <LevelBadge xp={profile.xp} size="md" />
           <div>
@@ -96,7 +100,7 @@ export default async function DashboardPage() {
 
       {/* Active / Paused quest timer */}
       {activeQuest && (
-        <div className="mb-6">
+        <div data-tour="active-timer" className="mb-6">
           <ActiveQuestTimer
             questTitle={activeQuest.quest?.title ?? 'Your quest'}
             userQuestId={activeQuest.id}
@@ -111,7 +115,7 @@ export default async function DashboardPage() {
 
       {/* Today's auto-assigned quest */}
       {todayUserQuest && (
-        <div className="mb-8">
+        <div data-tour="today-quest" className="mb-8">
           <div className="flex items-center gap-2 mb-4">
             <Target size={18} className="text-ember" />
             <h2 className="text-lg font-bold text-white">Today&apos;s Quest</h2>
@@ -156,7 +160,7 @@ export default async function DashboardPage() {
 
       {/* Smart diverse suggestions */}
       {suggested.length > 0 && (
-        <div className="mb-8">
+        <div data-tour="explore" className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Sparkles size={18} className="text-amber-400" />
