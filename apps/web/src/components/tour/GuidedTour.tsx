@@ -99,13 +99,19 @@ function tooltipPos(rect: Rect | null, pos: Step['position']): React.CSSProperti
   const gap     = 12
 
   // Centered modal for null-target steps
+  // NOTE: never use transform for centering here — Framer Motion's y/scale
+  // animations override the CSS transform, breaking the translate(-50%,-50%) trick.
+  // Always use calculated pixel positions instead.
   if (!rect) {
+    const centeredLeft = Math.round((vw - tw) / 2)
+    const centeredTop  = mob
+      ? Math.round(vh * 0.28)   // sit higher on mobile — avoids browser chrome
+      : Math.round(vh * 0.35)
     return {
-      position : 'fixed',
-      top      : mob ? '44%' : '50%',
-      left     : '50%',
-      transform: 'translate(-50%, -50%)',
-      width    : tw,
+      position: 'fixed',
+      top     : Math.max(16, centeredTop),
+      left    : Math.max(16, centeredLeft),
+      width   : tw,
     }
   }
 
