@@ -5,9 +5,9 @@ import { LayoutDashboard, Map, User } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const nav = [
-  { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { href: '/quests',    icon: Map,             label: 'Quests'    },
-  { href: '/profile',   icon: User,            label: 'Profile'   },
+  { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', tourId: undefined          },
+  { href: '/quests',    icon: Map,             label: 'Quests',    tourId: 'sidebar-quests'   },
+  { href: '/profile',   icon: User,            label: 'Profile',   tourId: 'sidebar-profile'  },
 ]
 
 export function MobileNav() {
@@ -23,12 +23,13 @@ export function MobileNav() {
         paddingBottom: 'env(safe-area-inset-bottom)',
       }}
     >
-      {nav.map(({ href, icon: Icon, label }) => {
+      {nav.map(({ href, icon: Icon, label, tourId }) => {
         const active = pathname === href || pathname.startsWith(href + '/')
         return (
           <Link
             key={href}
             href={href}
+            {...(tourId ? { 'data-tour': tourId } : {})}
             className={cn(
               'flex-1 flex flex-col items-center justify-center gap-1 py-3 transition-colors',
               active ? 'text-ember' : 'text-ash hover:text-white',
