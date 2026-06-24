@@ -158,9 +158,9 @@
 
   .no-select { user-select: none; }
 
+  /* Focus ring — uses box-shadow so it works without Tailwind ring utilities */
   .focus-ember:focus-visible {
-    @apply outline-none ring-2 ring-offset-2;
-    ring-color: rgba(232, 102, 61, 0.6);
-    ring-offset-color: #0A0705;
+    outline: none;
+    box-shadow: 0 0 0 2px #0A0705, 0 0 0 4px rgba(232, 102, 61, 0.65);
   }
 }

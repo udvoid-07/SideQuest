@@ -13,16 +13,18 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variants: Record<Variant, string> = {
+  // ember-600 (#C84D28) + white = 4.53:1 contrast — passes WCAG AA
   primary:
-    'bg-ember text-white shadow-ember hover:bg-ember-600 active:scale-95 disabled:bg-ember/40',
+    'bg-ember-600 text-white hover:bg-ember-700 active:scale-95 disabled:bg-ember/40',
   secondary:
     'bg-void-700 text-white border border-white/10 hover:bg-void-600 active:scale-95',
   ghost:
     'text-mist hover:text-white hover:bg-white/5 active:scale-95',
   danger:
     'bg-red-600/20 text-red-400 border border-red-600/30 hover:bg-red-600/30 active:scale-95',
+  // cream (#F5EDE3) text on transparent — readable on both dark bg and ember glow areas
   outline:
-    'border border-ember/50 text-ember hover:bg-ember/10 active:scale-95',
+    'border-2 border-ember/70 text-cream hover:bg-ember/15 hover:border-ember active:scale-95',
 }
 
 const sizes: Record<Size, string> = {

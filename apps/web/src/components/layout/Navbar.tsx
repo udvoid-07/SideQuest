@@ -25,12 +25,12 @@ export function Navbar() {
       </Link>
 
       {!isApp && (
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <Link href="/login">
-            <Button variant="ghost" size="sm">Sign In</Button>
+            <Button variant="ghost" size="sm" className="text-cream/80 hover:text-white">Sign In</Button>
           </Link>
           <Link href="/signup">
-            <Button size="sm">Get Started</Button>
+            <Button size="sm" className="shadow-ember">Start Free</Button>
           </Link>
         </div>
       )}
