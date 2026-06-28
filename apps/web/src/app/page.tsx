@@ -78,7 +78,8 @@ export default async function LandingPage() {
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
 
             {/* ── Left col: all the copy ── */}
-            <div className="space-y-5 sm:space-y-6">
+            {/* text-left is explicit — prevents sm: breakpoint from defaulting to center */}
+            <div className="space-y-5 sm:space-y-7 text-left">
 
               {/* Badge */}
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[11px] font-semibold"
@@ -95,18 +96,20 @@ export default async function LandingPage() {
                 <span className="text-ember">SideQuest.</span>
               </h1>
 
-              {/* Sub */}
-              <p className="text-[0.9rem] sm:text-base lg:text-lg text-mist leading-relaxed max-w-lg">
+              {/* Sub — line-height 1.7 for readability score */}
+              <p className="text-[0.9rem] sm:text-base lg:text-lg text-mist leading-[1.7] max-w-lg">
                 Stop saving adventures for someday. Get one real-world quest every day —
                 from pottery classes to solo train trips — and earn XP for actually doing them.
               </p>
 
-              {/* CTAs — stacked on mobile, side-by-side on sm+ */}
+              {/* CTAs ── stacked full-width on mobile, inline on sm+
+                  Fix: gradient uses ember-600→ember-700 (both 4.53:1+ with white)
+                  was: from-ember-600 to-ember (ember = #E8663D, only 3.16:1 — fails WCAG)  */}
               <div className="flex flex-col gap-3 sm:flex-row sm:gap-4 sm:items-center">
                 <Link href="/signup" className="block w-full sm:w-auto">
                   <Button
                     size="lg"
-                    className="w-full sm:w-auto shadow-ember bg-gradient-to-r from-ember-600 to-ember hover:from-ember-700 hover:to-ember-600"
+                    className="w-full sm:w-auto shadow-ember bg-gradient-to-br from-ember-600 to-ember-700 hover:from-ember-700 hover:to-ember-600"
                   >
                     Start Free
                     <ArrowRight size={16} />
@@ -119,12 +122,17 @@ export default async function LandingPage() {
                 </Link>
               </div>
 
+              {/* Trust micro-copy — keeps CTA and context together */}
+              <p className="text-[11px] text-ash -mt-1">
+                Free forever · No credit card · Cancel anytime
+              </p>
+
               {/* Social proof */}
-              <div className="flex items-center gap-6 sm:gap-8 pt-1">
+              <div className="flex items-center gap-6 sm:gap-8 pt-1 border-t border-white/5">
                 {stats.map(s => (
-                  <div key={s.label}>
+                  <div key={s.label} className="pt-4">
                     <div className="text-lg sm:text-2xl font-black text-white">{s.value}</div>
-                    <div className="text-[10px] sm:text-xs text-ash">{s.label}</div>
+                    <div className="text-[10px] sm:text-xs text-ash mt-0.5">{s.label}</div>
                   </div>
                 ))}
               </div>
@@ -169,7 +177,8 @@ export default async function LandingPage() {
 
           {/* ── Mobile quest preview (below hero copy, hidden on lg+) ── */}
           <div className="mt-10 lg:hidden">
-            <p className="text-[10px] uppercase tracking-widest text-ash font-semibold text-center mb-3">
+            {/* left-aligned to match hero text column — was text-center which broke hierarchy */}
+            <p className="text-[10px] uppercase tracking-widest text-ash font-semibold mb-3">
               Sample quests waiting for you
             </p>
             <div className="flex flex-col gap-2.5">
@@ -198,8 +207,9 @@ export default async function LandingPage() {
       </section>
 
       {/* ── CATEGORIES ────────────────────────────────────── */}
-      <section className="py-12 sm:py-20 px-4 sm:px-6 max-w-7xl mx-auto">
+      <section className="py-14 sm:py-20 px-4 sm:px-6 max-w-7xl mx-auto">
         <div className="text-center mb-8 sm:mb-12">
+          <p className="text-[10px] uppercase tracking-widest text-ash font-semibold mb-2">Explore</p>
           <h2 className="text-xl sm:text-3xl font-black text-white">Every flavour of adventure</h2>
           <p className="text-mist mt-1.5 text-sm">8 categories. Hundreds of quests.</p>
         </div>
@@ -223,8 +233,9 @@ export default async function LandingPage() {
                style={{ background: 'rgba(42,26,14,0.35)', borderTop: '1px solid rgba(255,210,170,0.06)', borderBottom: '1px solid rgba(255,210,170,0.06)' }}>
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-8 sm:mb-12">
-            <h2 className="text-xl sm:text-3xl font-black text-white">How SideQuest works</h2>
-            <p className="text-mist mt-1.5 text-sm">Three steps between you and your next story.</p>
+            <p className="text-[10px] uppercase tracking-widest text-ash font-semibold mb-2">How it works</p>
+            <h2 className="text-xl sm:text-3xl font-black text-white">Three steps. One story.</h2>
+            <p className="text-mist mt-1.5 text-sm">Start in under 2 minutes.</p>
           </div>
           {/* Single column mobile, 3-col sm+ */}
           <div className="grid sm:grid-cols-3 gap-6 sm:gap-8">
@@ -286,6 +297,7 @@ export default async function LandingPage() {
         <div className="max-w-5xl mx-auto">
           <div className="grid md:grid-cols-2 gap-8 sm:gap-12 items-center">
             <div>
+              <p className="text-[10px] uppercase tracking-widest text-ash font-semibold mb-2">Gamification</p>
               <h2 className="text-xl sm:text-3xl font-black text-white mb-3 sm:mb-4">
                 Why should fun only exist in games?
               </h2>
@@ -354,14 +366,14 @@ export default async function LandingPage() {
           <Link href="/signup" className="block">
             <Button
               size="lg"
-              className="w-full shadow-ember bg-gradient-to-r from-ember-600 to-ember hover:from-ember-700 hover:to-ember-600"
+              className="w-full shadow-ember bg-gradient-to-br from-ember-600 to-ember-700 hover:from-ember-700 hover:to-ember-600"
             >
               Create Free Account
               <ArrowRight size={16} />
             </Button>
           </Link>
           <p className="text-[11px] text-ash mt-3">
-            No credit card · Cancel anytime
+            Free forever · No credit card · Cancel anytime
           </p>
         </div>
       </section>

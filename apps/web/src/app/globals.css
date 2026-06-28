@@ -164,3 +164,10 @@
     box-shadow: 0 0 0 2px #0A0705, 0 0 0 4px rgba(232, 102, 61, 0.65);
   }
 }
+
+/* ── Global link focus state (keyboard accessibility) ─────────────────── */
+a:focus-visible {
+  outline: none;
+  border-radius: 4px;
+  box-shadow: 0 0 0 2px #0A0705, 0 0 0 4px rgba(232, 102, 61, 0.65);
+}
