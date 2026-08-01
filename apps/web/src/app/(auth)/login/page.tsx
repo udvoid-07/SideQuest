@@ -9,7 +9,7 @@ import { createClient } from '@/lib/supabase'
 
 export default function LoginPage() {
   const router = useRouter()
-  const [email, setEmail] = useState('')
+  const [identifier, setIdentifier] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -19,7 +19,10 @@ export default function LoginPage() {
     setLoading(true)
     setError(null)
     const supabase = createClient()
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    const value = identifier.trim()
+    const { error } = await supabase.auth.signInWithPassword(
+      value.includes('@') ? { email: value, password } : { phone: value, password },
+    )
     if (error) {
       setError(error.message)
       setLoading(false)
@@ -50,12 +53,13 @@ export default function LoginPage() {
         <div className="glass rounded-2xl p-6 space-y-4">
           <form onSubmit={handleLogin} className="space-y-4">
             <Input
-              label="Email"
-              type="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
+              label="Email or phone"
+              type="text"
+              placeholder="you@example.com or +919876543210"
+              value={identifier}
+              onChange={e => setIdentifier(e.target.value)}
               icon={<Mail size={16} />}
+              autoComplete="username"
               required
             />
             <div className="space-y-1.5">

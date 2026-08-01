@@ -2,6 +2,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowRight, ArrowLeft, X } from 'lucide-react'
+import { useEscapeClose } from '@/lib/use-escape-close'
 
 export const TOUR_KEY = 'sq:tour:seen'
 
@@ -225,6 +226,8 @@ export function GuidedTour({ onDone }: Props) {
     onDone()
   }
 
+  useEscapeClose(skip)
+
   // Spotlight styles
   const showSpotlight = !!rect
   const spotlightStyle: React.CSSProperties = showSpotlight
@@ -289,6 +292,9 @@ export function GuidedTour({ onDone }: Props) {
             onClick={e => e.stopPropagation()}
           >
             <div
+              role="dialog"
+              aria-modal="true"
+              aria-label={`Guided tour: ${current.title}`}
               className="rounded-2xl overflow-hidden shadow-2xl"
               style={{
                 background    : 'rgba(15,8,4,0.98)',

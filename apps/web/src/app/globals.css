@@ -143,7 +143,7 @@
 
 @layer utilities {
   .text-mist  { color: #D4B09A; }
-  .text-ash   { color: #806040; }
+  .text-ash   { color: #9C7A52; }  /* lightened from #806040 — old value was ~3.4:1 against dark backgrounds, below WCAG AA's 4.5:1 for the small text sizes it's used at */
   .bg-surface { background-color: rgba(42, 26, 14, 0.6); }
 
   /* Full-viewport height that respects iOS browser chrome */
