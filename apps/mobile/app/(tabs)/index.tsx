@@ -1,25 +1,92 @@
-import { ScrollView, View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native'
+import { useCallback, useEffect, useState } from 'react'
+import { ScrollView, View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { Zap, Clock, Coins, Flame, Trophy } from 'lucide-react-native'
-import { getLevelInfo, getXPProgress } from '@sidequest/core'
+import { router } from 'expo-router'
+import { Zap, Clock, Coins } from 'lucide-react-native'
+import {
+  getLevelInfo, getXPProgress, CATEGORY_ICONS,
+  formatCost, formatDuration, TIER_LABELS,
+} from '@sidequest/core'
+import type { UserProfile, UserQuest, QuestCategory, QuestTier } from '@sidequest/core'
+import { supabase } from '../../lib/supabase'
 
-const { width } = Dimensions.get('window')
 const C = { void: '#321847', ember: '#f15153', mist: '#C9B8D8', ash: '#6B5080', bg: '#0f0716', gold: '#F5A623' }
 
-const MOCK_USER = { username: 'Ravi', xp: 480, streak_count: 7, total_quests_completed: 14 }
-
-const TODAY_QUEST = {
-  id: '1',
-  title: 'Visit a Museum You\'ve Never Been To',
-  description: 'Spend 90 minutes immersing in culture at a museum you\'ve always passed by.',
-  category: 'learning', tier: 'C', xp_reward: 120, duration_minutes: 120,
-  cost_min: 0, cost_max: 200, tags: ['culture', 'solo'],
+function getGreeting() {
+  const hour = new Date().getHours()
+  if (hour < 12) return 'Good morning'
+  if (hour < 17) return 'Good afternoon'
+  if (hour < 21) return 'Good evening'
+  return 'Good night'
 }
 
 export default function DashboardScreen() {
-  const level = getLevelInfo(MOCK_USER.xp)
-  const { percent } = getXPProgress(MOCK_USER.xp)
+  const [profile, setProfile]       = useState<UserProfile | null>(null)
+  const [todayQuest, setTodayQuest] = useState<UserQuest | null>(null)
+  const [loading, setLoading]       = useState(true)
+  const [starting, setStarting]     = useState(false)
+
+  const load = useCallback(async () => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { router.replace('/(auth)/login'); return }
+
+    const [{ data: profileData }, { data: existing }] = await Promise.all([
+      supabase.from('users').select('*').eq('id', user.id).single(),
+      supabase
+        .from('user_quests')
+        .select('*, quest:quests(*)')
+        .eq('user_id', user.id)
+        .in('status', ['assigned', 'in_progress'])
+        .order('assigned_at', { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+    ])
+
+    setProfile(profileData as UserProfile)
+
+    if (existing) {
+      setTodayQuest(existing as UserQuest)
+    } else {
+      const { data: newId } = await supabase.rpc('assign_daily_quest', { p_user_id: user.id })
+      if (newId) {
+        const { data: fresh } = await supabase
+          .from('user_quests')
+          .select('*, quest:quests(*)')
+          .eq('id', newId)
+          .single()
+        setTodayQuest(fresh as UserQuest | null)
+      }
+    }
+    setLoading(false)
+  }, [])
+
+  useEffect(() => { load() }, [load])
+
+  const startQuest = useCallback(async () => {
+    if (!todayQuest || starting) return
+    setStarting(true)
+    const { error } = await supabase.rpc('start_quest', { p_user_quest_id: todayQuest.id })
+    setStarting(false)
+    if (error) { Alert.alert('Error', error.message); return }
+    setTodayQuest(q => q ? { ...q, status: 'in_progress' } : q)
+    Alert.alert('Quest started!', 'Head out and complete it before the timer runs out.')
+  }, [todayQuest, starting])
+
+  if (loading || !profile) {
+    return (
+      <LinearGradient colors={['#0f0716', '#1a0c27']} style={{ flex: 1 }}>
+        <SafeAreaView style={styles.centered}>
+          <ActivityIndicator size="large" color={C.ember} />
+        </SafeAreaView>
+      </LinearGradient>
+    )
+  }
+
+  const level = getLevelInfo(profile.xp)
+  const { percent } = getXPProgress(profile.xp)
+  const quest = todayQuest?.quest
+  const isInProgress = todayQuest?.status === 'in_progress'
 
   return (
     <LinearGradient colors={['#0f0716', '#1a0c27']} style={{ flex: 1 }}>
@@ -29,8 +96,8 @@ export default function DashboardScreen() {
           {/* Header */}
           <View style={styles.header}>
             <View>
-              <Text style={styles.greeting}>Good morning,</Text>
-              <Text style={styles.username}>{MOCK_USER.username} 👋</Text>
+              <Text style={styles.greeting}>{getGreeting()},</Text>
+              <Text style={styles.username}>{profile.username} 👋</Text>
             </View>
             {/* Level badge */}
             <View style={[styles.levelBadge, { borderColor: level.color, shadowColor: level.color }]}>
@@ -42,7 +109,7 @@ export default function DashboardScreen() {
           <View style={styles.xpSection}>
             <View style={styles.xpRow}>
               <Text style={styles.xpLabel}>{level.title}</Text>
-              <Text style={styles.xpNum}>{MOCK_USER.xp} XP</Text>
+              <Text style={styles.xpNum}>{profile.xp} XP</Text>
             </View>
             <View style={styles.xpTrack}>
               <View style={[styles.xpFill, { width: `${percent}%` as any }]} />
@@ -53,76 +120,96 @@ export default function DashboardScreen() {
           <View style={styles.statsRow}>
             <View style={styles.statCard}>
               <Text style={styles.statIcon}>🔥</Text>
-              <Text style={[styles.statVal, { color: '#f97316' }]}>{MOCK_USER.streak_count}</Text>
+              <Text style={[styles.statVal, { color: '#f97316' }]}>{profile.streak_count}</Text>
               <Text style={styles.statLabel}>Streak</Text>
             </View>
             <View style={styles.statCard}>
               <Text style={styles.statIcon}>⚡</Text>
-              <Text style={[styles.statVal, { color: C.gold }]}>{MOCK_USER.xp}</Text>
+              <Text style={[styles.statVal, { color: C.gold }]}>{profile.xp}</Text>
               <Text style={styles.statLabel}>XP</Text>
             </View>
             <View style={styles.statCard}>
               <Text style={styles.statIcon}>🏆</Text>
-              <Text style={[styles.statVal, { color: '#34D399' }]}>{MOCK_USER.total_quests_completed}</Text>
+              <Text style={[styles.statVal, { color: '#34D399' }]}>{profile.total_quests_completed}</Text>
               <Text style={styles.statLabel}>Done</Text>
             </View>
           </View>
 
           {/* Today's quest */}
           <Text style={styles.sectionTitle}>Today's Quest</Text>
-          <View style={styles.questCard}>
-            {/* Tier + category row */}
-            <View style={styles.questMeta}>
-              <View style={styles.tierBadge}>
-                <Text style={styles.tierText}>{TODAY_QUEST.tier} · Medium</Text>
-              </View>
-              <Text style={styles.categoryText}>📚 {TODAY_QUEST.category}</Text>
-            </View>
-
-            <Text style={styles.questTitle}>{TODAY_QUEST.title}</Text>
-            <Text style={styles.questDesc}>{TODAY_QUEST.description}</Text>
-
-            {/* Quest stats */}
-            <View style={styles.questStats}>
-              <View style={styles.questStat}>
-                <Zap size={13} color={C.gold} />
-                <Text style={[styles.questStatText, { color: C.gold }]}>{TODAY_QUEST.xp_reward} XP</Text>
-              </View>
-              <View style={styles.questStat}>
-                <Clock size={13} color={C.ash} />
-                <Text style={styles.questStatText}>2h</Text>
-              </View>
-              <View style={styles.questStat}>
-                <Coins size={13} color={C.ash} />
-                <Text style={styles.questStatText}>Free–₹200</Text>
-              </View>
-            </View>
-
-            {/* Tags */}
-            <View style={styles.tagsRow}>
-              {TODAY_QUEST.tags.map(t => (
-                <View key={t} style={styles.tag}>
-                  <Text style={styles.tagText}>#{t}</Text>
+          {quest ? (
+            <View style={styles.questCard}>
+              {/* Tier + category row */}
+              <View style={styles.questMeta}>
+                <View style={styles.tierBadge}>
+                  <Text style={styles.tierText}>{quest.tier} · {TIER_LABELS[quest.tier as QuestTier]}</Text>
                 </View>
-              ))}
-            </View>
+                <Text style={styles.categoryText}>
+                  {CATEGORY_ICONS[quest.category as QuestCategory] ?? '🎯'} {quest.category}
+                </Text>
+              </View>
 
-            {/* Start button */}
-            <TouchableOpacity style={styles.startBtn} activeOpacity={0.85}>
-              <LinearGradient colors={['#f15153', '#de2022']} style={styles.startGrad}>
-                <Text style={styles.startText}>▶  Start Quest</Text>
-              </LinearGradient>
-            </TouchableOpacity>
-          </View>
+              <Text style={styles.questTitle}>{quest.title}</Text>
+              <Text style={styles.questDesc}>{quest.description}</Text>
+
+              {/* Quest stats */}
+              <View style={styles.questStats}>
+                <View style={styles.questStat}>
+                  <Zap size={13} color={C.gold} />
+                  <Text style={[styles.questStatText, { color: C.gold }]}>{quest.xp_reward} XP</Text>
+                </View>
+                <View style={styles.questStat}>
+                  <Clock size={13} color={C.ash} />
+                  <Text style={styles.questStatText}>{formatDuration(quest.duration_minutes)}</Text>
+                </View>
+                <View style={styles.questStat}>
+                  <Coins size={13} color={C.ash} />
+                  <Text style={styles.questStatText}>{formatCost(quest.cost_min, quest.cost_max)}</Text>
+                </View>
+              </View>
+
+              {/* Tags */}
+              <View style={styles.tagsRow}>
+                {quest.tags.map(t => (
+                  <View key={t} style={styles.tag}>
+                    <Text style={styles.tagText}>#{t}</Text>
+                  </View>
+                ))}
+              </View>
+
+              {/* Start button */}
+              <TouchableOpacity
+                style={styles.startBtn}
+                activeOpacity={0.85}
+                onPress={startQuest}
+                disabled={isInProgress || starting}
+              >
+                <LinearGradient colors={['#f15153', '#de2022']} style={styles.startGrad}>
+                  {starting
+                    ? <ActivityIndicator color="#fff" size="small" />
+                    : <Text style={styles.startText}>{isInProgress ? '⏳  Quest In Progress' : '▶  Start Quest'}</Text>
+                  }
+                </LinearGradient>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <View style={styles.emptyQuest}>
+              <Text style={styles.emptyIcon}>🧭</Text>
+              <Text style={styles.emptyTitle}>No quest assigned yet</Text>
+              <Text style={styles.emptyDesc}>Check the Explore tab to browse available quests.</Text>
+            </View>
+          )}
 
           {/* Streak nudge */}
-          <View style={styles.streakNudge}>
-            <Text style={styles.streakNudgeIcon}>🔥</Text>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.streakNudgeTitle}>Keep your {MOCK_USER.streak_count}-day streak alive!</Text>
-              <Text style={styles.streakNudgeDesc}>Complete today's quest before midnight.</Text>
+          {profile.streak_count > 0 && (
+            <View style={styles.streakNudge}>
+              <Text style={styles.streakNudgeIcon}>🔥</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.streakNudgeTitle}>Keep your {profile.streak_count}-day streak alive!</Text>
+                <Text style={styles.streakNudgeDesc}>Complete today's quest before midnight.</Text>
+              </View>
             </View>
-          </View>
+          )}
 
         </ScrollView>
       </SafeAreaView>
@@ -131,6 +218,7 @@ export default function DashboardScreen() {
 }
 
 const styles = StyleSheet.create({
+  centered:     { flex: 1, alignItems: 'center', justifyContent: 'center' },
   scroll:       { padding: 20, paddingBottom: 40 },
   header:       { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 },
   greeting:     { color: C.mist, fontSize: 14 },
@@ -191,6 +279,13 @@ const styles = StyleSheet.create({
   startBtn:     { borderRadius: 14, overflow: 'hidden' },
   startGrad:    { height: 50, alignItems: 'center', justifyContent: 'center' },
   startText:    { color: '#fff', fontWeight: '700', fontSize: 16, letterSpacing: 0.3 },
+  emptyQuest: {
+    alignItems: 'center', padding: 28, borderRadius: 20, marginBottom: 16,
+    backgroundColor: 'rgba(74,32,96,0.35)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)',
+  },
+  emptyIcon:    { fontSize: 32, marginBottom: 8 },
+  emptyTitle:   { color: '#fff', fontSize: 15, fontWeight: '700' },
+  emptyDesc:    { color: C.ash, fontSize: 12, marginTop: 4, textAlign: 'center' },
   streakNudge: {
     flexDirection: 'row', alignItems: 'center', gap: 12,
     backgroundColor: 'rgba(249,115,22,0.12)',
