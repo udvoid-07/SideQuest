@@ -7,6 +7,7 @@ import { LevelBadge } from '@/components/gamification/LevelBadge'
 import { XPBar } from '@/components/gamification/XPBar'
 import { signOut } from '@/app/actions'
 import { SideQuestIcon } from '@/components/ui/SideQuestIcon'
+import { InstallAppButton } from '@/components/layout/InstallAppButton'
 import type { UserProfile } from '@sidequest/core'
 
 const nav = [
@@ -80,7 +81,8 @@ export function Sidebar({ user }: { user: UserProfile }) {
       </nav>
 
       {/* Sign out */}
-      <div className="p-3 border-t border-white/5">
+      <div className="p-3 border-t border-white/5 space-y-1">
+        <InstallAppButton />
         <button
           onClick={handleSignOut}
           className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-ash hover:text-red-400 hover:bg-red-500/10 transition-all w-full"
