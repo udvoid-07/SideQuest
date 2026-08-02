@@ -7,15 +7,10 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { createClient } from '@/lib/supabase'
 
-type Method = 'email' | 'phone'
 type Step = 'details' | 'verify'
 
 const RESEND_COOLDOWN_SECS = 60
 const PASSWORD_HINT = '8+ characters, with at least one number and one special character'
-
-function isValidPhone(value: string) {
-  return /^\+[1-9]\d{7,14}$/.test(value)
-}
 
 function isStrongPassword(value: string) {
   return value.length >= 8 && /\d/.test(value) && /[^A-Za-z0-9]/.test(value)
@@ -24,9 +19,8 @@ function isStrongPassword(value: string) {
 export default function SignUpPage() {
   const router = useRouter()
   const [step, setStep] = useState<Step>('details')
-  const [method, setMethod] = useState<Method>('email')
 
-  const [form, setForm] = useState({ username: '', identifier: '', password: '' })
+  const [form, setForm] = useState({ username: '', email: '', password: '' })
   const [otp, setOtp]   = useState('')
 
   const [loading, setLoading] = useState(false)
@@ -45,13 +39,7 @@ export default function SignUpPage() {
 
   function validateDetails(): string | null {
     if (!form.username.trim()) return 'Username is required.'
-    const identifier = form.identifier.trim()
-    if (!identifier) return 'Email or phone number is required.'
-    if (identifier.includes('@')) {
-      if (!/^\S+@\S+\.\S+$/.test(identifier)) return 'Enter a valid email address.'
-    } else if (!isValidPhone(identifier)) {
-      return 'Enter a valid phone number with country code, e.g. +919876543210.'
-    }
+    if (!/^\S+@\S+\.\S+$/.test(form.email.trim())) return 'Enter a valid email address.'
     if (!isStrongPassword(form.password)) return `Password needs ${PASSWORD_HINT.toLowerCase()}.`
     return null
   }
@@ -61,19 +49,15 @@ export default function SignUpPage() {
     const validationError = validateDetails()
     if (validationError) { setError(validationError); return }
 
-    const identifier = form.identifier.trim()
-    const resolvedMethod: Method = identifier.includes('@') ? 'email' : 'phone'
-    setMethod(resolvedMethod)
-
     setLoading(true)
     setError(null)
     const supabase = createClient()
 
-    const { data, error } = await supabase.auth.signUp(
-      resolvedMethod === 'email'
-        ? { email: identifier, password: form.password, options: { data: { username: form.username.trim() } } }
-        : { phone: identifier, password: form.password, options: { data: { username: form.username.trim() } } },
-    )
+    const { data, error } = await supabase.auth.signUp({
+      email: form.email.trim(),
+      password: form.password,
+      options: { data: { username: form.username.trim() } },
+    })
 
     setLoading(false)
     if (error) {
@@ -94,13 +78,12 @@ export default function SignUpPage() {
     setLoading(true)
     setError(null)
     const supabase = createClient()
-    const identifier = form.identifier.trim()
 
-    const { data, error } = await supabase.auth.verifyOtp(
-      method === 'email'
-        ? { email: identifier, token: otp.trim(), type: 'signup' }
-        : { phone: identifier, token: otp.trim(), type: 'sms' },
-    )
+    const { data, error } = await supabase.auth.verifyOtp({
+      email: form.email.trim(),
+      token: otp.trim(),
+      type: 'signup',
+    })
 
     setLoading(false)
     if (error) {
@@ -114,12 +97,7 @@ export default function SignUpPage() {
     if (cooldown > 0) return
     setError(null)
     const supabase = createClient()
-    const identifier = form.identifier.trim()
-    const { error } = await supabase.auth.resend(
-      method === 'email'
-        ? { type: 'signup', email: identifier }
-        : { type: 'sms', phone: identifier },
-    )
+    const { error } = await supabase.auth.resend({ type: 'signup', email: form.email.trim() })
     if (error) setError(error.message)
     else setCooldown(RESEND_COOLDOWN_SECS)
   }
@@ -142,7 +120,7 @@ export default function SignUpPage() {
           <p className="text-mist text-sm mt-1">
             {step === 'details'
               ? 'Your first quest awaits'
-              : `We sent a 6-digit code to ${form.identifier.trim()}`}
+              : `We sent a 6-digit code to ${form.email.trim()}`}
           </p>
         </div>
 
@@ -160,14 +138,13 @@ export default function SignUpPage() {
               />
 
               <Input
-                label="Email or phone number"
-                type="text"
-                placeholder="you@example.com or +919876543210"
-                value={form.identifier}
-                onChange={e => update('identifier', e.target.value)}
+                label="Email"
+                type="email"
+                placeholder="you@example.com"
+                value={form.email}
+                onChange={e => update('email', e.target.value)}
                 icon={<Mail size={16} />}
-                autoComplete="username"
-                hint="Phone numbers need a country code"
+                autoComplete="email"
                 required
               />
 
@@ -241,7 +218,7 @@ export default function SignUpPage() {
                   onClick={() => { setStep('details'); setError(null); setOtp('') }}
                   className="flex items-center gap-1 text-ash hover:text-white transition-colors"
                 >
-                  <ArrowLeft size={14} /> Change details
+                  <ArrowLeft size={14} /> Change email
                 </button>
                 <button
                   type="button"
