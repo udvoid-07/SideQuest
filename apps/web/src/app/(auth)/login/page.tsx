@@ -19,7 +19,7 @@ export default function LoginPage() {
     setLoading(true)
     setError(null)
     const supabase = createClient()
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
     if (error) {
       setError(error.message)
       setLoading(false)
@@ -56,6 +56,7 @@ export default function LoginPage() {
               value={email}
               onChange={e => setEmail(e.target.value)}
               icon={<Mail size={16} />}
+              autoComplete="email"
               required
             />
             <div className="space-y-1.5">

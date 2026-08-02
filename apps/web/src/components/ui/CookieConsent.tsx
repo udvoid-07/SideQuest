@@ -56,7 +56,7 @@ export function CookieConsent() {
             </button>
           </div>
         </div>
-        <button onClick={decline} className="w-11 h-11 flex items-center justify-center text-ash hover:text-white transition-colors flex-shrink-0 -mr-2 -mt-1">
+        <button onClick={decline} aria-label="Decline cookies" className="w-11 h-11 flex items-center justify-center text-ash hover:text-white transition-colors flex-shrink-0 -mr-2 -mt-1">
           <X size={16} />
         </button>
       </div>

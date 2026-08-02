@@ -209,7 +209,7 @@ export async function updateProfile(updates: {
 // ─── Send password reset email ────────────────────────────
 export async function sendPasswordReset() {
   const user = await getAuthUser()
-  if (!user?.email) return { error: 'Not authenticated' }
+  if (!user?.email) return { error: 'No email on this account' }
 
   const supabase = createSupabaseServerClient()
   const { error } = await supabase.auth.resetPasswordForEmail(user.email, {

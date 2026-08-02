@@ -71,7 +71,7 @@ export function EditProfileForm({ profile }: Props) {
     <div className="glass rounded-2xl p-6 space-y-5 border border-ember/20">
       <div className="flex items-center justify-between">
         <h3 className="font-bold text-white">Edit Profile</h3>
-        <button onClick={() => setOpen(false)} className="w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-ash hover:text-white transition-colors -mr-2 -mt-1">
+        <button onClick={() => setOpen(false)} aria-label="Cancel edit" className="w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-ash hover:text-white transition-colors -mr-2 -mt-1">
           <X size={14} />
         </button>
       </div>
@@ -86,12 +86,14 @@ export function EditProfileForm({ profile }: Props) {
 
       {/* Personality */}
       <div>
-        <label className="text-sm font-medium text-mist mb-2 block">Personality</label>
-        <div className="flex gap-2">
+        <span id="edit-personality-label" className="text-sm font-medium text-mist mb-2 block">Personality</span>
+        <div role="radiogroup" aria-labelledby="edit-personality-label" className="flex gap-2">
           {PERSONALITIES.map(p => (
             <button
               key={p.value}
               type="button"
+              role="radio"
+              aria-checked={personality === p.value}
               onClick={() => setPersonality(p.value as PersonalityType)}
               className={`flex-1 py-2.5 rounded-xl text-xs font-semibold border transition-all flex flex-col items-center gap-1
                 ${personality === p.value
@@ -108,12 +110,14 @@ export function EditProfileForm({ profile }: Props) {
 
       {/* Fitness */}
       <div>
-        <label className="text-sm font-medium text-mist mb-2 block">Fitness Level</label>
-        <div className="grid grid-cols-5 gap-1.5">
+        <span id="edit-fitness-label" className="text-sm font-medium text-mist mb-2 block">Fitness Level</span>
+        <div role="radiogroup" aria-labelledby="edit-fitness-label" className="grid grid-cols-5 gap-1.5">
           {FITNESS_LEVELS.map(f => (
             <button
               key={f.value}
               type="button"
+              role="radio"
+              aria-checked={fitness === f.value}
               onClick={() => setFitness(f.value as FitnessLevel)}
               className={`py-2 rounded-xl text-xs font-semibold border transition-all flex flex-col items-center gap-0.5
                 ${fitness === f.value
@@ -129,12 +133,14 @@ export function EditProfileForm({ profile }: Props) {
 
       {/* Budget */}
       <div>
-        <label className="text-sm font-medium text-mist mb-2 block">Budget</label>
-        <div className="grid grid-cols-4 gap-1.5">
+        <span id="edit-budget-label" className="text-sm font-medium text-mist mb-2 block">Budget</span>
+        <div role="radiogroup" aria-labelledby="edit-budget-label" className="grid grid-cols-4 gap-1.5">
           {BUDGETS.map(b => (
             <button
               key={b.value}
               type="button"
+              role="radio"
+              aria-checked={budget === b.value}
               onClick={() => setBudget(b.value as BudgetTier)}
               className={`py-2.5 rounded-xl text-xs font-semibold border transition-all flex flex-col items-center gap-0.5
                 ${budget === b.value

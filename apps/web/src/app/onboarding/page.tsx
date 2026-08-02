@@ -84,8 +84,9 @@ export default function OnboardingPage() {
 
     const { error: upsertError } = await supabase.from('users').upsert({
       id: user.id,
-      email: user.email!,
-      username: user.user_metadata?.username ?? user.email!.split('@')[0],
+      email: user.email ?? null,
+      phone: user.phone ?? null,
+      username: user.user_metadata?.username ?? user.email?.split('@')[0] ?? 'Adventurer',
       age: parseInt(form.age),
       gender: form.gender,
       city: form.city,
@@ -219,10 +220,12 @@ function StepBasics({ form, update }: any) {
       <Input label="Age" type="number" placeholder="25" min={13} max={99}
              value={form.age} onChange={(e: any) => update('age', e.target.value)} required />
       <div>
-        <label className="text-sm font-medium text-mist mb-1.5 block">Gender</label>
-        <div className="grid grid-cols-2 gap-2">
+        <span id="gender-label" className="text-sm font-medium text-mist mb-1.5 block">Gender</span>
+        <div role="radiogroup" aria-labelledby="gender-label" className="grid grid-cols-2 gap-2">
           {GENDERS.map(g => (
             <button key={g.value} type="button"
+              role="radio"
+              aria-checked={form.gender === g.value}
               onClick={() => update('gender', g.value)}
               className={`p-3 rounded-xl text-sm font-medium border transition-all
                 ${form.gender === g.value
@@ -245,12 +248,13 @@ function StepPersonality({ form, update }: any) {
   return (
     <div className="glass rounded-2xl p-7 space-y-5">
       <div>
-        <h2 className="text-2xl font-black text-white">How do you recharge?</h2>
+        <h2 id="personality-label" className="text-2xl font-black text-white">How do you recharge?</h2>
         <p className="text-mist text-sm mt-1">This shapes the social difficulty of your quests.</p>
       </div>
-      <div className="space-y-3">
+      <div role="radiogroup" aria-labelledby="personality-label" className="space-y-3">
         {PERSONALITIES.map(p => (
-          <button key={p.value} type="button" onClick={() => update('personality_type', p.value)}
+          <button key={p.value} type="button" role="radio" aria-checked={form.personality_type === p.value}
+            onClick={() => update('personality_type', p.value)}
             className={`w-full p-4 rounded-xl text-left border transition-all flex items-center gap-4
               ${form.personality_type === p.value
                 ? 'bg-ember/15 border-ember/50'
@@ -276,12 +280,13 @@ function StepFitness({ form, update }: any) {
   return (
     <div className="glass rounded-2xl p-7 space-y-5">
       <div>
-        <h2 className="text-2xl font-black text-white">Physical fitness level?</h2>
+        <h2 id="fitness-label" className="text-2xl font-black text-white">Physical fitness level?</h2>
         <p className="text-mist text-sm mt-1">We won't give you a marathon quest if you chose sedentary.</p>
       </div>
-      <div className="space-y-2">
+      <div role="radiogroup" aria-labelledby="fitness-label" className="space-y-2">
         {FITNESS_LEVELS.map(f => (
-          <button key={f.value} type="button" onClick={() => update('fitness_level', f.value)}
+          <button key={f.value} type="button" role="radio" aria-checked={form.fitness_level === f.value}
+            onClick={() => update('fitness_level', f.value)}
             className={`w-full p-3.5 rounded-xl text-left border transition-all flex items-center gap-3
               ${form.fitness_level === f.value
                 ? 'bg-ember/15 border-ember/50'
@@ -307,12 +312,13 @@ function StepBudget({ form, update }: any) {
   return (
     <div className="glass rounded-2xl p-7 space-y-5">
       <div>
-        <h2 className="text-2xl font-black text-white">Budget comfort?</h2>
+        <h2 id="budget-label" className="text-2xl font-black text-white">Budget comfort?</h2>
         <p className="text-mist text-sm mt-1">We'll only show quests within your range.</p>
       </div>
-      <div className="space-y-3">
+      <div role="radiogroup" aria-labelledby="budget-label" className="space-y-3">
         {BUDGETS.map(b => (
-          <button key={b.value} type="button" onClick={() => update('budget_tier', b.value)}
+          <button key={b.value} type="button" role="radio" aria-checked={form.budget_tier === b.value}
+            onClick={() => update('budget_tier', b.value)}
             className={`w-full p-4 rounded-xl text-left border transition-all flex items-center gap-4
               ${form.budget_tier === b.value
                 ? 'bg-ember/15 border-ember/50'

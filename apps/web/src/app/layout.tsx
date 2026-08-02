@@ -16,6 +16,11 @@ export const metadata: Metadata = {
     description: 'Daily real-world quests. Real XP. Real stories.',
     type: 'website',
   },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'SideQuest',
+  },
 }
 
 export const viewport: Viewport = {

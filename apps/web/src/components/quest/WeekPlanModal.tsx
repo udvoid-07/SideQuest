@@ -5,6 +5,8 @@ import { X, Sparkles, Loader2, Calendar, Zap, Clock } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { TIER_COLORS, CATEGORY_ICONS, formatDuration } from '@sidequest/core'
 import type { Quest } from '@sidequest/core'
+import { useEscapeClose } from '@/lib/use-escape-close'
+import { useFocusTrap } from '@/lib/use-focus-trap'
 
 interface DayPlan { day: string; quest: Quest | null; reason: string | null }
 
@@ -21,6 +23,8 @@ export function WeekPlanModal({ onClose, userId }: WeekPlanModalProps) {
   const [plan,    setPlan]    = useState<DayPlan[] | null>(null)
   const [summary, setSummary] = useState('')
   const [error,   setError]   = useState('')
+  useEscapeClose(onClose)
+  const dialogRef = useFocusTrap<HTMLDivElement>()
 
   async function generatePlan() {
     setLoading(true)
@@ -49,11 +53,16 @@ export function WeekPlanModal({ onClose, userId }: WeekPlanModalProps) {
         className="fixed inset-0 bg-black/75 backdrop-blur-sm z-40" onClick={onClose} />
 
       <motion.div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="AI quest week planner"
+        tabIndex={-1}
         initial={{ opacity: 0, scale: 0.93, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="fixed inset-4 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-[640px] md:max-h-[85vh] z-50 rounded-2xl overflow-hidden flex flex-col"
-        style={{ background: 'linear-gradient(160deg,#1e0e2b 0%,#321847 100%)', border: '1px solid rgba(255,255,255,0.12)' }}
+        className="fixed inset-4 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-[640px] md:max-h-[85vh] z-50 rounded-2xl overflow-hidden flex flex-col outline-none"
+        style={{ background: 'linear-gradient(160deg,#1c1109 0%,#2a1a0e 100%)', border: '1px solid rgba(255,255,255,0.12)' }}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-white/8 flex-shrink-0">
@@ -62,7 +71,7 @@ export function WeekPlanModal({ onClose, userId }: WeekPlanModalProps) {
             <span className="font-bold text-white">AI Quest Week Planner</span>
             <span className="text-xs text-ash">powered by Claude</span>
           </div>
-          <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-mist">
+          <button onClick={onClose} aria-label="Close" className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-mist">
             <X size={15} />
           </button>
         </div>
@@ -108,7 +117,7 @@ export function WeekPlanModal({ onClose, userId }: WeekPlanModalProps) {
 
               {plan.map(({ day, quest, reason }, i) => (
                 <div key={day} className="flex items-start gap-3 p-4 rounded-xl"
-                     style={{ background: 'rgba(74,32,96,0.35)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                     style={{ background: 'rgba(42,26,14,0.5)', border: '1px solid rgba(255,255,255,0.07)' }}>
                   {/* Day indicator */}
                   <div className="flex-shrink-0 text-center">
                     <div className="text-xs text-ash uppercase tracking-wide">{DAY_SHORT[i]}</div>

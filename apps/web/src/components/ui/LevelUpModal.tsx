@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { X, Zap } from 'lucide-react'
 import { getLevelInfo, LEVEL_TABLE } from '@sidequest/core'
 import { Button } from './Button'
+import { useEscapeClose } from '@/lib/use-escape-close'
+import { useFocusTrap } from '@/lib/use-focus-trap'
 
 interface LevelUpModalProps {
   readonly levelAfter: number
@@ -13,6 +15,8 @@ interface LevelUpModalProps {
 
 export function LevelUpModal({ levelAfter, xpEarned, newBadges, onClose }: LevelUpModalProps) {
   const level = LEVEL_TABLE.find(l => l.level === levelAfter) ?? LEVEL_TABLE[0]
+  useEscapeClose(onClose)
+  const dialogRef = useFocusTrap<HTMLDivElement>()
 
   return (
     <AnimatePresence>
@@ -25,20 +29,25 @@ export function LevelUpModal({ levelAfter, xpEarned, newBadges, onClose }: Level
         onClick={onClose}
       >
         <motion.div
+          ref={dialogRef}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Level up celebration"
+          tabIndex={-1}
           initial={{ opacity: 0, scale: 0.7, y: 40 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.8, y: 20 }}
           transition={{ type: 'spring', damping: 18, stiffness: 200 }}
-          className="relative rounded-3xl p-8 max-w-sm w-full text-center overflow-hidden"
+          className="relative rounded-3xl p-8 max-w-sm w-full text-center overflow-hidden outline-none"
           style={{
-            background: `radial-gradient(ellipse at top, ${level.color}25 0%, rgba(50,24,71,0.98) 70%)`,
+            background: `radial-gradient(ellipse at top, ${level.color}25 0%, rgba(28,17,9,0.98) 70%)`,
             border: `2px solid ${level.color}60`,
             boxShadow: `0 0 60px ${level.color}40`,
           }}
           onClick={e => e.stopPropagation()}
         >
           {/* Close */}
-          <button onClick={onClose}
+          <button onClick={onClose} aria-label="Close"
             className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-mist">
             <X size={15} />
           </button>

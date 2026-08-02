@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { MobileNav } from '@/components/layout/MobileNav'
+import { ServiceWorkerRegister } from '@/components/layout/ServiceWorkerRegister'
 import { createSupabaseServerClient, getAuthUser } from '@/lib/supabase-server'
 import { getUserProfile } from '@/lib/queries'
 
@@ -15,6 +16,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="flex min-h-screen">
+      <ServiceWorkerRegister />
+
       {/* Desktop sidebar — hidden on mobile */}
       <div className="hidden md:block">
         <Sidebar user={profile} />

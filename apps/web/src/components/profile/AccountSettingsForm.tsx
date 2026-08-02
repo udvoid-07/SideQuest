@@ -1,10 +1,11 @@
 'use client'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Check, Loader2, User, Mail, Lock, MapPin, ChevronDown, ChevronUp, Map } from 'lucide-react'
+import { Check, Loader2, User, Mail, Phone, Lock, MapPin, ChevronDown, ChevronUp, Map } from 'lucide-react'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
 import { updateProfile, sendPasswordReset } from '@/app/actions'
+import { NotificationSettings } from './NotificationSettings'
 import type { UserProfile, PersonalityType, FitnessLevel, BudgetTier } from '@sidequest/core'
 
 const TOUR_KEY = 'sq:tour:seen'
@@ -100,15 +101,19 @@ export function AccountSettingsForm({ profile }: Props) {
           placeholder="Your username"
         />
 
-        {/* Email — read-only */}
+        {/* Email or phone — read-only, whichever was verified at signup */}
         <div>
-          <label className="text-sm font-medium text-mist block mb-1.5">Email</label>
-          <div className="flex items-center gap-3 px-4 h-12 rounded-xl border border-white/8 bg-void-800/40 text-mist text-sm">
-            <Mail size={15} className="text-ash flex-shrink-0" />
-            <span className="flex-1 truncate">{profile.email}</span>
+          <label id="identifier-label" className="text-sm font-medium text-mist block mb-1.5">
+            {profile.email ? 'Email' : 'Phone'}
+          </label>
+          <div aria-labelledby="identifier-label" className="flex items-center gap-3 px-4 h-12 rounded-xl border border-white/8 bg-void-800/40 text-mist text-sm">
+            {profile.email ? <Mail size={15} className="text-ash flex-shrink-0" /> : <Phone size={15} className="text-ash flex-shrink-0" />}
+            <span className="flex-1 truncate">{profile.email ?? profile.phone}</span>
             <span className="text-[10px] text-ash bg-void-700/60 px-2 py-0.5 rounded-full border border-white/5 flex-shrink-0">verified</span>
           </div>
-          <p className="text-[11px] text-ash mt-1 pl-1">To change email, contact support.</p>
+          <p className="text-[11px] text-ash mt-1 pl-1">
+            To change your {profile.email ? 'email' : 'phone number'}, contact support.
+          </p>
         </div>
 
         <Input
@@ -123,7 +128,11 @@ export function AccountSettingsForm({ profile }: Props) {
       {/* ── Password ── */}
       <div className="p-5">
         <p className="text-xs font-semibold text-ash uppercase tracking-widest mb-3">Password</p>
-        {pwSent ? (
+        {!profile.email ? (
+          <p className="text-[11px] text-ash">
+            Password reset via SMS isn&apos;t available yet — contact support if you&apos;re locked out.
+          </p>
+        ) : pwSent ? (
           <div className="flex items-center gap-2 text-emerald-400 text-sm">
             <Check size={15} />
             Reset link sent to {profile.email}
@@ -158,12 +167,14 @@ export function AccountSettingsForm({ profile }: Props) {
           <div className="mt-4 space-y-5">
             {/* Personality */}
             <div>
-              <label className="text-sm font-medium text-mist mb-2 block">Personality</label>
-              <div className="grid grid-cols-3 gap-2">
+              <span id="settings-personality-label" className="text-sm font-medium text-mist mb-2 block">Personality</span>
+              <div role="radiogroup" aria-labelledby="settings-personality-label" className="grid grid-cols-3 gap-2">
                 {PERSONALITIES.map(p => (
                   <button
                     key={p.value}
                     type="button"
+                    role="radio"
+                    aria-checked={personality === p.value}
                     onClick={() => setPersonality(p.value as PersonalityType)}
                     className={`py-3 rounded-xl text-xs font-semibold border transition-all flex flex-col items-center gap-1
                       ${personality === p.value
@@ -181,12 +192,14 @@ export function AccountSettingsForm({ profile }: Props) {
 
             {/* Fitness */}
             <div>
-              <label className="text-sm font-medium text-mist mb-2 block">Fitness Level</label>
-              <div className="grid grid-cols-5 gap-1.5">
+              <span id="settings-fitness-label" className="text-sm font-medium text-mist mb-2 block">Fitness Level</span>
+              <div role="radiogroup" aria-labelledby="settings-fitness-label" className="grid grid-cols-5 gap-1.5">
                 {FITNESS_LEVELS.map(f => (
                   <button
                     key={f.value}
                     type="button"
+                    role="radio"
+                    aria-checked={fitness === f.value}
                     onClick={() => setFitness(f.value as FitnessLevel)}
                     className={`py-2.5 rounded-xl text-xs font-semibold border transition-all flex flex-col items-center gap-0.5
                       ${fitness === f.value
@@ -203,12 +216,14 @@ export function AccountSettingsForm({ profile }: Props) {
 
             {/* Budget */}
             <div>
-              <label className="text-sm font-medium text-mist mb-2 block">Budget per Quest</label>
-              <div className="grid grid-cols-4 gap-1.5">
+              <span id="settings-budget-label" className="text-sm font-medium text-mist mb-2 block">Budget per Quest</span>
+              <div role="radiogroup" aria-labelledby="settings-budget-label" className="grid grid-cols-4 gap-1.5">
                 {BUDGETS.map(b => (
                   <button
                     key={b.value}
                     type="button"
+                    role="radio"
+                    aria-checked={budget === b.value}
                     onClick={() => setBudget(b.value as BudgetTier)}
                     className={`py-3 rounded-xl text-xs font-semibold border transition-all flex flex-col items-center gap-1
                       ${budget === b.value
@@ -225,6 +240,9 @@ export function AccountSettingsForm({ profile }: Props) {
           </div>
         )}
       </div>
+
+      {/* ── Notifications ── */}
+      <NotificationSettings />
 
       {/* ── Guided Tour ── */}
       <div className="p-5">

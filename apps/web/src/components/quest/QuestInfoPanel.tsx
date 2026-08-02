@@ -6,6 +6,8 @@ import type { Quest } from '@sidequest/core'
 import { TIER_COLORS, TIER_LABELS, CATEGORY_ICONS, formatCost, formatDuration } from '@sidequest/core'
 import { Badge } from '@/components/ui/Badge'
 import { NearbyLocations } from './NearbyLocations'
+import { useEscapeClose } from '@/lib/use-escape-close'
+import { useFocusTrap } from '@/lib/use-focus-trap'
 
 interface QuestInfoPanelProps {
   quest: Quest
@@ -41,6 +43,9 @@ export function QuestInfoPanel({ quest, onClose, userCity = '' }: QuestInfoPanel
     return () => { cancelled = true }
   }, [quest.id, userCity])
 
+  useEscapeClose(onClose)
+  const dialogRef = useFocusTrap<HTMLDivElement>()
+
   return (
     <>
       {/* Backdrop */}
@@ -54,11 +59,16 @@ export function QuestInfoPanel({ quest, onClose, userCity = '' }: QuestInfoPanel
 
       {/* Panel */}
       <motion.div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={`${quest.title} details`}
+        tabIndex={-1}
         initial={{ opacity: 0, x: '100%' }}
         animate={{ opacity: 1, x: 0 }}
         exit={{ opacity: 0, x: '100%' }}
         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-        className="fixed right-0 top-0 bottom-0 w-full max-w-md z-50 overflow-y-auto"
+        className="fixed right-0 top-0 bottom-0 w-full max-w-md z-50 overflow-y-auto outline-none"
         style={{
           background: 'linear-gradient(160deg, #100b06 0%, #1c1109 60%, #2a1a0e 100%)',
           borderLeft: '1px solid rgba(255,210,170,0.10)',
@@ -76,6 +86,7 @@ export function QuestInfoPanel({ quest, onClose, userCity = '' }: QuestInfoPanel
           </div>
           <button
             onClick={onClose}
+            aria-label="Close"
             className="w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-mist hover:text-white transition-colors"
           >
             <X size={16} />
