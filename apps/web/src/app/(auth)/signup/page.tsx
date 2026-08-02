@@ -65,6 +65,12 @@ export default function SignUpPage() {
     } else if (data.session) {
       // Confirmation disabled on this project — session created immediately
       router.push('/onboarding')
+    } else if (data.user?.identities?.length === 0) {
+      // Supabase silently no-ops (no error, no email) for an email that's
+      // already registered and confirmed — this is its anti-enumeration
+      // behavior, not a failure. Surface it explicitly instead of sending
+      // the user to a verify screen that will never receive a code.
+      setError('An account with this email already exists. Try signing in instead.')
     } else {
       setStep('verify')
       setCooldown(RESEND_COOLDOWN_SECS)
