@@ -94,7 +94,8 @@ export async function POST(req: Request) {
   try {
     const { subject, html } = signupOtpEmail(otp)
     await sendEmail({ to: email, subject, html })
-  } catch {
+  } catch (err) {
+    console.error('[signup/request-otp] Resend send failed:', err)
     return NextResponse.json({ error: 'Failed to send verification email. Try again shortly.' }, { status: 502 })
   }
 
