@@ -44,6 +44,24 @@ export default function SignUpPage() {
     return null
   }
 
+  async function requestOtp(): Promise<boolean> {
+    const res = await fetch('/api/auth/signup/request-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: form.username.trim(),
+        email: form.email.trim(),
+        password: form.password,
+      }),
+    })
+    const data = await res.json()
+    if (!res.ok) {
+      setError(data.error ?? 'Something went wrong. Try again.')
+      return false
+    }
+    return true
+  }
+
   async function handleSignUp(e: React.FormEvent) {
     e.preventDefault()
     const validationError = validateDetails()
@@ -51,27 +69,10 @@ export default function SignUpPage() {
 
     setLoading(true)
     setError(null)
-    const supabase = createClient()
 
-    const { data, error } = await supabase.auth.signUp({
-      email: form.email.trim(),
-      password: form.password,
-      options: { data: { username: form.username.trim() } },
-    })
-
+    const ok = await requestOtp()
     setLoading(false)
-    if (error) {
-      setError(error.message)
-    } else if (data.session) {
-      // Confirmation disabled on this project — session created immediately
-      router.push('/onboarding')
-    } else if (data.user?.identities?.length === 0) {
-      // Supabase silently no-ops (no error, no email) for an email that's
-      // already registered and confirmed — this is its anti-enumeration
-      // behavior, not a failure. Surface it explicitly instead of sending
-      // the user to a verify screen that will never receive a code.
-      setError('An account with this email already exists. Try signing in instead.')
-    } else {
+    if (ok) {
       setStep('verify')
       setCooldown(RESEND_COOLDOWN_SECS)
     }
@@ -83,29 +84,38 @@ export default function SignUpPage() {
 
     setLoading(true)
     setError(null)
-    const supabase = createClient()
 
-    const { data, error } = await supabase.auth.verifyOtp({
+    const res = await fetch('/api/auth/signup/verify-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: form.email.trim(), code: otp.trim() }),
+    })
+    const data = await res.json()
+
+    if (!res.ok) {
+      setLoading(false)
+      setError(data.error ?? 'Something went wrong. Try again.')
+      return
+    }
+
+    // Verified server-side — establish the client session with the password
+    // the user already entered.
+    const supabase = createClient()
+    const { error } = await supabase.auth.signInWithPassword({
       email: form.email.trim(),
-      token: otp.trim(),
-      type: 'signup',
+      password: form.password,
     })
 
     setLoading(false)
-    if (error) {
-      setError(error.message)
-    } else if (data.session) {
-      router.push('/onboarding')
-    }
+    if (error) setError(error.message)
+    else router.push('/onboarding')
   }
 
   async function handleResend() {
     if (cooldown > 0) return
     setError(null)
-    const supabase = createClient()
-    const { error } = await supabase.auth.resend({ type: 'signup', email: form.email.trim() })
-    if (error) setError(error.message)
-    else setCooldown(RESEND_COOLDOWN_SECS)
+    const ok = await requestOtp()
+    if (ok) setCooldown(RESEND_COOLDOWN_SECS)
   }
 
   return (
