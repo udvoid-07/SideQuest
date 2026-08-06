@@ -1,10 +1,11 @@
 'use client'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Check, Loader2, User, Mail, Phone, Lock, MapPin, ChevronDown, ChevronUp, Map } from 'lucide-react'
+import Link from 'next/link'
+import { Check, User, Mail, Phone, Lock, MapPin, ChevronDown, ChevronUp, Map } from 'lucide-react'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
-import { updateProfile, sendPasswordReset } from '@/app/actions'
+import { updateProfile } from '@/app/actions'
 import { NotificationSettings } from './NotificationSettings'
 import type { UserProfile, PersonalityType, FitnessLevel, BudgetTier } from '@sidequest/core'
 
@@ -52,9 +53,6 @@ export function AccountSettingsForm({ profile }: Props) {
   const [saved, setSaved]           = useState(false)
   const [error, setError]           = useState<string | null>(null)
   const [showPrefs, setShowPrefs]   = useState(false)
-  const [pwLoading, setPwLoading]   = useState(false)
-  const [pwSent, setPwSent]         = useState(false)
-  const [pwError, setPwError]       = useState<string | null>(null)
 
   async function handleSave() {
     setSaving(true)
@@ -73,18 +71,6 @@ export function AccountSettingsForm({ profile }: Props) {
       setTimeout(() => setSaved(false), 2000)
     }
     setSaving(false)
-  }
-
-  async function handlePasswordReset() {
-    setPwLoading(true)
-    setPwError(null)
-    const res = await sendPasswordReset()
-    if (res.error) {
-      setPwError(res.error)
-    } else {
-      setPwSent(true)
-    }
-    setPwLoading(false)
   }
 
   return (
@@ -132,23 +118,16 @@ export function AccountSettingsForm({ profile }: Props) {
           <p className="text-[11px] text-ash">
             Password reset via SMS isn&apos;t available yet — contact support if you&apos;re locked out.
           </p>
-        ) : pwSent ? (
-          <div className="flex items-center gap-2 text-emerald-400 text-sm">
-            <Check size={15} />
-            Reset link sent to {profile.email}
-          </div>
         ) : (
           <div className="space-y-2">
-            <button
-              onClick={handlePasswordReset}
-              disabled={pwLoading}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold border border-white/10 text-mist hover:text-white hover:border-ember/40 hover:bg-ember/8 transition-all disabled:opacity-50"
+            <Link
+              href="/forgot-password"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold border border-white/10 text-mist hover:text-white hover:border-ember/40 hover:bg-ember/8 transition-all w-fit"
             >
-              {pwLoading ? <Loader2 size={14} className="animate-spin" /> : <Lock size={14} />}
-              Send Password Reset Email
-            </button>
-            {pwError && <p className="text-xs text-red-400">{pwError}</p>}
-            <p className="text-[11px] text-ash pl-1">We&apos;ll email you a link to set a new password.</p>
+              <Lock size={14} />
+              Reset Password
+            </Link>
+            <p className="text-[11px] text-ash pl-1">We&apos;ll email you a verification code to set a new password.</p>
           </div>
         )}
       </div>

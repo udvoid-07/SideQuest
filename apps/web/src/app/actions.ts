@@ -206,19 +206,6 @@ export async function updateProfile(updates: {
   return { success: true }
 }
 
-// ─── Send password reset email ────────────────────────────
-export async function sendPasswordReset() {
-  const user = await getAuthUser()
-  if (!user?.email) return { error: 'No email on this account' }
-
-  const supabase = createSupabaseServerClient()
-  const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'}/reset-password`,
-  })
-  if (error) return { error: error.message }
-  return { success: true }
-}
-
 // ─── Remove a queued quest ────────────────────────────────
 export async function removeFromQueue(userQuestId: string) {
   const user = await getAuthUser()
