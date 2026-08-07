@@ -6,11 +6,13 @@ import { Compass, Mail, Lock, User, ArrowRight, ArrowLeft, ShieldCheck } from 'l
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { createClient } from '@/lib/supabase'
+import { getUsernameError, USERNAME_MAX_LENGTH } from '@sidequest/core'
 
 type Step = 'details' | 'verify'
 
 const RESEND_COOLDOWN_SECS = 60
 const PASSWORD_HINT = '8+ characters, with at least one number and one special character'
+const USERNAME_HINT = `Up to ${USERNAME_MAX_LENGTH} characters — letters, numbers, _ and @ only`
 
 function isStrongPassword(value: string) {
   return value.length >= 8 && /\d/.test(value) && /[^A-Za-z0-9]/.test(value)
@@ -38,7 +40,8 @@ export default function SignUpPage() {
   }
 
   function validateDetails(): string | null {
-    if (!form.username.trim()) return 'Username is required.'
+    const usernameError = getUsernameError(form.username)
+    if (usernameError) return usernameError
     if (!/^\S+@\S+\.\S+$/.test(form.email.trim())) return 'Enter a valid email address.'
     if (!isStrongPassword(form.password)) return `Password needs ${PASSWORD_HINT.toLowerCase()}.`
     return null
@@ -150,6 +153,8 @@ export default function SignUpPage() {
                 onChange={e => update('username', e.target.value)}
                 icon={<User size={16} />}
                 autoComplete="username"
+                hint={USERNAME_HINT}
+                maxLength={USERNAME_MAX_LENGTH}
                 required
               />
 

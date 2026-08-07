@@ -1,6 +1,7 @@
 'use server'
 import { revalidatePath } from 'next/cache'
 import { createSupabaseServerClient, getAuthUser } from '@/lib/supabase-server'
+import { getUsernameError } from '@sidequest/core'
 
 // ─── Start a quest ────────────────────────────────────────
 // Accepts a quest_id (no row yet) or user_quest_id (row exists).
@@ -194,13 +195,21 @@ export async function updateProfile(updates: {
   const user = await getAuthUser()
   if (!user) return { error: 'Not authenticated' }
 
+  if (updates.username !== undefined) {
+    const usernameError = getUsernameError(updates.username)
+    if (usernameError) return { error: usernameError }
+  }
+
   const supabase = createSupabaseServerClient()
   const { error } = await supabase
     .from('users')
     .update(updates)
     .eq('id', user.id)
 
-  if (error) return { error: error.message }
+  if (error) {
+    if (error.code === '23505') return { error: 'That username is already taken.' }
+    return { error: error.message }
+  }
   revalidatePath('/profile')
   revalidatePath('/dashboard')
   return { success: true }

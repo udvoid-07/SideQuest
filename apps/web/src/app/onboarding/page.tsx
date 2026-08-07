@@ -85,7 +85,6 @@ export default function OnboardingPage() {
     const { error: upsertError } = await supabase.from('users').upsert({
       id: user.id,
       email: user.email ?? null,
-      phone: user.phone ?? null,
       username: user.user_metadata?.username ?? user.email?.split('@')[0] ?? 'Adventurer',
       age: parseInt(form.age),
       gender: form.gender,
@@ -99,7 +98,11 @@ export default function OnboardingPage() {
     })
 
     if (upsertError) {
-      setSaveError(upsertError.message)
+      setSaveError(
+        upsertError.code === '23505'
+          ? 'That username was just taken by someone else — please contact support to pick a new one.'
+          : upsertError.message,
+      )
       setLoading(false)
       return
     }

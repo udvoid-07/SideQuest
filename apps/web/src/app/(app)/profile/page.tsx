@@ -52,7 +52,7 @@ export default async function ProfilePage() {
           <LevelBadge xp={profile.xp} size="lg" />
           <div className="flex-1 min-w-0">
             <h2 className="text-xl font-black text-white truncate">{profile.username}</h2>
-            <p className="text-mist text-sm truncate">{profile.email ?? profile.phone}</p>
+            <p className="text-mist text-sm truncate">{profile.email}</p>
             <p className="text-xs text-ash mt-1 capitalize">{profile.personality_type} · {profile.city}</p>
           </div>
         </div>

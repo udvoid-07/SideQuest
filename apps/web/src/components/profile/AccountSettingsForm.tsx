@@ -2,12 +2,15 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Check, User, Mail, Phone, Lock, MapPin, ChevronDown, ChevronUp, Map } from 'lucide-react'
+import { Check, User, Mail, Lock, MapPin, ChevronDown, ChevronUp, Map } from 'lucide-react'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
 import { updateProfile } from '@/app/actions'
 import { NotificationSettings } from './NotificationSettings'
+import { getUsernameError, USERNAME_MAX_LENGTH } from '@sidequest/core'
 import type { UserProfile, PersonalityType, FitnessLevel, BudgetTier } from '@sidequest/core'
+
+const USERNAME_HINT = `Up to ${USERNAME_MAX_LENGTH} characters — letters, numbers, _ and @ only`
 
 const TOUR_KEY = 'sq:tour:seen'
 
@@ -55,6 +58,9 @@ export function AccountSettingsForm({ profile }: Props) {
   const [showPrefs, setShowPrefs]   = useState(false)
 
   async function handleSave() {
+    const usernameError = getUsernameError(username)
+    if (usernameError) { setError(usernameError); return }
+
     setSaving(true)
     setError(null)
     const res = await updateProfile({
@@ -85,21 +91,19 @@ export function AccountSettingsForm({ profile }: Props) {
           onChange={e => setUsername(e.target.value)}
           icon={<User size={15} />}
           placeholder="Your username"
+          hint={USERNAME_HINT}
+          maxLength={USERNAME_MAX_LENGTH}
         />
 
-        {/* Email or phone — read-only, whichever was verified at signup */}
+        {/* Email — read-only */}
         <div>
-          <label id="identifier-label" className="text-sm font-medium text-mist block mb-1.5">
-            {profile.email ? 'Email' : 'Phone'}
-          </label>
+          <label id="identifier-label" className="text-sm font-medium text-mist block mb-1.5">Email</label>
           <div aria-labelledby="identifier-label" className="flex items-center gap-3 px-4 h-12 rounded-xl border border-white/8 bg-void-800/40 text-mist text-sm">
-            {profile.email ? <Mail size={15} className="text-ash flex-shrink-0" /> : <Phone size={15} className="text-ash flex-shrink-0" />}
-            <span className="flex-1 truncate">{profile.email ?? profile.phone}</span>
+            <Mail size={15} className="text-ash flex-shrink-0" />
+            <span className="flex-1 truncate">{profile.email}</span>
             <span className="text-[10px] text-ash bg-void-700/60 px-2 py-0.5 rounded-full border border-white/5 flex-shrink-0">verified</span>
           </div>
-          <p className="text-[11px] text-ash mt-1 pl-1">
-            To change your {profile.email ? 'email' : 'phone number'}, contact support.
-          </p>
+          <p className="text-[11px] text-ash mt-1 pl-1">To change your email, contact support.</p>
         </div>
 
         <Input
@@ -114,22 +118,16 @@ export function AccountSettingsForm({ profile }: Props) {
       {/* ── Password ── */}
       <div className="p-5">
         <p className="text-xs font-semibold text-ash uppercase tracking-widest mb-3">Password</p>
-        {!profile.email ? (
-          <p className="text-[11px] text-ash">
-            Password reset via SMS isn&apos;t available yet — contact support if you&apos;re locked out.
-          </p>
-        ) : (
-          <div className="space-y-2">
-            <Link
-              href="/forgot-password"
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold border border-white/10 text-mist hover:text-white hover:border-ember/40 hover:bg-ember/8 transition-all w-fit"
-            >
-              <Lock size={14} />
-              Reset Password
-            </Link>
-            <p className="text-[11px] text-ash pl-1">We&apos;ll email you a verification code to set a new password.</p>
-          </div>
-        )}
+        <div className="space-y-2">
+          <Link
+            href="/forgot-password"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold border border-white/10 text-mist hover:text-white hover:border-ember/40 hover:bg-ember/8 transition-all w-fit"
+          >
+            <Lock size={14} />
+            Reset Password
+          </Link>
+          <p className="text-[11px] text-ash pl-1">We&apos;ll email you a verification code to set a new password.</p>
+        </div>
       </div>
 
       {/* ── Preferences (questionnaire) ── */}

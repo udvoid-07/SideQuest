@@ -8,8 +8,7 @@ export type Gender = 'male' | 'female' | 'non-binary' | 'prefer-not-to-say'
 export interface UserProfile {
   id: string
   username: string
-  email: string | null
-  phone: string | null
+  email: string
   avatar_url: string | null
   age: number
   gender: Gender

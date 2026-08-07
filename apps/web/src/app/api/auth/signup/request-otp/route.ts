@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createSupabaseAdminClient } from '@/lib/supabase-server'
 import { generateOtp, hashOtp, OTP_TTL_SECONDS, OTP_RESEND_COOLDOWN_SECONDS } from '@/lib/otp'
 import { sendEmail, signupOtpEmail } from '@/lib/resend'
+import { getUsernameError } from '@sidequest/core'
 
 function isStrongPassword(value: string) {
   return value.length >= 8 && /\d/.test(value) && /[^A-Za-z0-9]/.test(value)
@@ -13,13 +14,27 @@ export async function POST(req: Request) {
   const email    = (body?.email ?? '').trim().toLowerCase()
   const password = body?.password ?? ''
 
-  if (!username) return NextResponse.json({ error: 'Username is required.' }, { status: 400 })
+  const usernameError = getUsernameError(username)
+  if (usernameError) return NextResponse.json({ error: usernameError }, { status: 400 })
   if (!/^\S+@\S+\.\S+$/.test(email)) return NextResponse.json({ error: 'Enter a valid email address.' }, { status: 400 })
   if (!isStrongPassword(password)) {
     return NextResponse.json({ error: 'Password needs 8+ characters, a number, and a special character.' }, { status: 400 })
   }
 
   const supabase = createSupabaseAdminClient()
+
+  // Usernames only land in public.users at onboarding, so this catches the
+  // common case (an already-onboarded user with this name); the DB's
+  // case-insensitive unique index is the real backstop against races.
+  const { data: usernameTaken } = await supabase
+    .from('users')
+    .select('id')
+    .ilike('username', username)
+    .maybeSingle()
+
+  if (usernameTaken) {
+    return NextResponse.json({ error: 'That username is already taken.' }, { status: 409 })
+  }
 
   // ── Server-side resend cooldown (defense in depth vs. the client timer) ──
   const { data: recent } = await supabase
